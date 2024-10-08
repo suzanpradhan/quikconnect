@@ -23,6 +23,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["process.env.d.ts", "./**/*.ts"],
+  "include": ["process.env.d.ts", "./**/*.ts", "src/drizzle/migrate.ts"],
   "exclude": ["node_modules"]
 }
