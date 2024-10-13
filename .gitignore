@@ -1,4 +1,5 @@
 
+.build
 # Please take extra care not to add rules that will make tracked files ignored.
 # To test that, run `git ls-files -i --exclude-standard`.
 # To check why a specific file is ignored, run `git check-ignore -v <filepath>`.
@@ -23,7 +24,7 @@
 !.nycrc
 !.yamllint.yaml
 !.configurations/
-
+!.env.example
 # === Rules for root dir ===
 /core
 /vgcore.*
@@ -167,6 +168,3 @@ __pycache__
 
 # === Rules for C++ development ===
 compile_commands.json
-
-.build
-.env
