@@ -1,8 +1,14 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import {migrate} from "drizzle-orm/node-postgres/migrator"
+import db from "../db/db_connect"
 
 
-import { drizzle } from 'drizzle-orm/xata-http';
-import { UserTable} from '../db/schema';
-const db = await drizzle('node-postgres', process.env.DATABASE_URL);
-const usersCount = await db.$count(UserTable);
+
+ async function migrationData() {
+        await migrate(db,{migrationsFolder:"./src/drizzle/migrations"})
+        process.exit(0)
+
+ }
+migrationData().catch((e)=>{
+        console.log(e);
+        process.exit(1)
+})
