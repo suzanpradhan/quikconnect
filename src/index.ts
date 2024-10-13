@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import db from '../src/db/db_connect'
+import db from '../src/db/db_connect';
 
 console.log('hello');
 
