@@ -1,5 +1,5 @@
 {
-  "id": "9f368631-1212-43dd-a1a4-f3c9516d98e9",
+  "id": "cda83c15-510f-47f2-b2f3-401c68a7aad5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -26,6 +26,18 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avtar": {
+          "name": "avtar",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

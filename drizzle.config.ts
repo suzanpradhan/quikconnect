@@ -1,16 +1,11 @@
 import { defineConfig } from 'drizzle-kit';
 // via connection params
 export default defineConfig({
-  schema: './src/db/schema.ts',
-  out: './src/drizzle/migrations',
+  schema: './src/schema/schema.ts',
+  out: './src/drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    host: 'localhost',
-    port: 5433,
-    user: 'postgres',
-    password: '@jelsa123',
-    database: 'project',
-    ssl: false, // can be boolean | "require" | "allow" | true| "verify-full" | options from node:tls
+    url: process.env.DATABASE_URL!,
   },
   verbose: true,
   strict: true,
