@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import authRoute from './routes/auth.route';
 
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());//express default middleware
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
+app.use('/auth',authRoute)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);

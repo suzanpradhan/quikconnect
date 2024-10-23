@@ -9,4 +9,13 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
+  prettier, //  this line to disable ESLint rules that conflict with Prettier
+  {
+    plugins: {
+      prettier: prettierPlugin, // Add the Prettier plugin
+    },
+    rules: {
+      'prettier/prettier': 'error', // Enforce Prettier formatting rules as ESLint errors
+    },
+  },
 ];
