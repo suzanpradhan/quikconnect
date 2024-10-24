@@ -17,8 +17,16 @@ export const signup = async (req: Request, res: Response) => {
     if (password !== conformPassword) {
       return res.status(400).json({ Error: "password don't match! use same password as before" });
     }
+
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    // Validate Gmail format
+    if (!gmailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please use a valid Gmail address' });
+    }
+
     const checkUserExist = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
-    if (checkUserExist) {
+    if (checkUserExist.length > 0) {
+      // if (!checkUserExist)
       return res.status(400).json({ message: 'mail already exist' });
     }
     const salt = await bcrypt.genSalt(10);
@@ -32,11 +40,6 @@ export const signup = async (req: Request, res: Response) => {
     });
     if (newUser) {
       res.status(200).json({ message: 'user created' });
-      // generateToken(newUser.id,res)
-      // res.status(201).json({
-      //   id:newUser.id,
-      //   name:newUser.name,
-      // })
     }
   } catch (error) {
     console.error(signup, error);
@@ -63,14 +66,19 @@ export const signin = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       res.status(400).json({ Message: 'invalid credential' });
     }
-    res.status(200).json({
+    const token = generateToken(user.id, user.email);
+
+    // Return the token in the response body along with user info
+    return res.status(200).json({
       message: 'Signin successful',
+      token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
       },
     });
+   
   } catch (error: any) {
     console.error('error in controller signin', error);
     return res.status(400).json({ message: 'internal server error' });
@@ -79,8 +87,5 @@ export const signin = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 };
