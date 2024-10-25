@@ -1,9 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import db from '../src/db/db_connect';
+import authRoute from './routes/auth.route';
 
-console.log('hello');
 
 dotenv.config();
 
@@ -12,14 +11,15 @@ const PORT = process.env.PORT ?? 8000;
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json());//express default middleware
 
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
+app.use('/auth',authRoute)
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 export default app;

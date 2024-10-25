@@ -1,5 +1,5 @@
 {
-  "id": "1c407c87-d36d-484b-825f-609c6910e632",
+  "id": "cda83c15-510f-47f2-b2f3-401c68a7aad5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -20,6 +20,24 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avtar": {
+          "name": "avtar",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
