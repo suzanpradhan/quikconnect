@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register --exec ts-node ./src/index.ts --files",
+    "gs": "ts-node ./src/swagger",
+    "dev": " npm run gs && cross-env NODE_ENV=development nodemon -r tsconfig-paths/register --exec ts-node ./src/index.ts --files",
     "start": "cross-env NODE_ENV=production node ./build/src/index.js",
     "build": "tsc && tsc-alias",
     "lint": "eslint ./src/**/*.ts --fix",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
+    "@ngrok/ngrok": "^1.4.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2",
     "@types/express": "^4",
@@ -36,6 +38,8 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
+    "@types/socket.io": "^3.0.1",
+    "@types/swagger-ui-express": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^6",
     "cross-env": "^7",
     "drizzle-kit": "^0.25.0",
@@ -49,9 +53,15 @@
     "eslint-plugin-promise": "^6",
     "eslint-plugin-react": "^7.37.1",
     "globals": "^15.11.0",
+    "install": "^0.13.0",
     "jest": "^29",
     "nodemon": "^3",
+    "npm": "^10.9.0",
     "prettier": "^3",
+    "socket.io": "^4.8.1",
+    "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ts-jest": "^29",
     "ts-node": "^10",
     "tsc-alias": "^1",
@@ -59,5 +69,10 @@
     "typescript": "~5.3",
     "typescript-eslint": "^8.8.1",
     "typescript-transform-paths": "^3"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "swagger_output.json"
+    ]
   }
 }
