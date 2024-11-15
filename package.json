@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/register --exec ts-node ./src/index.ts --files",
+    "gs": "ts-node ./src/swagger",
+    "dev": " npm run gs && cross-env NODE_ENV=development nodemon -r tsconfig-paths/register --exec ts-node ./src/index.ts --files",
     "start": "cross-env NODE_ENV=production node ./build/src/index.js",
     "build": "tsc && tsc-alias",
     "lint": "eslint ./src/**/*.ts --fix",
@@ -17,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
@@ -25,6 +27,9 @@
     "express": "^4",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0",
+    "socket.io": "^4.8.1",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1",
     "up": "^1.0.2"
   },
   "devDependencies": {
@@ -36,6 +41,8 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
+    "@types/socket.io": "^3.0.1",
+    "@types/swagger-ui-express": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^6",
     "cross-env": "^7",
     "drizzle-kit": "^0.25.0",
@@ -59,5 +66,10 @@
     "typescript": "~5.3",
     "typescript-eslint": "^8.8.1",
     "typescript-transform-paths": "^3"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "swagger_output.json"
+    ]
   }
 }

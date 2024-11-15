@@ -78,7 +78,6 @@ export const signin = async (req: Request, res: Response) => {
         email: user.email,
       },
     });
-   
   } catch (error: any) {
     console.error('error in controller signin', error);
     return res.status(400).json({ message: 'internal server error' });
@@ -86,6 +85,16 @@ export const signin = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
+  try {
+  } catch (error) {}
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+  } catch (error) {}
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
   try {
   } catch (error) {}
 };

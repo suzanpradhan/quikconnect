@@ -7,10 +7,10 @@ import { Pool } from 'pg'; // Make sure pg is installed
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: true, // You may want to handle SSL in production differently
+    rejectUnauthorized: true, // we may want to handle SSL in production differently
   },
 });
 
-// Pass the pool (or client) to drizzle
+// Pass the pool to drizzle
 const db = drizzle(pool);
 export { db };
