@@ -14,7 +14,7 @@ export const signup = async (req: Request, res: Response) => {
     if (password.length < 6) {
       return res.status(400).json({ Error: 'Password must be at least 6 characters long' });
     }
-    if (password !== conformPassword) {
+    if (password != conformPassword) {
       return res.status(400).json({ Error: "password don't match! use same password as before" });
     }
 
@@ -27,7 +27,7 @@ export const signup = async (req: Request, res: Response) => {
     const checkUserExist = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
     if (checkUserExist.length > 0) {
       // if (!checkUserExist)
-      return res.status(400).json({ message: 'mail already exist' });
+      return res.status(401).json({ message: 'mail already exist' });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -39,14 +39,23 @@ export const signup = async (req: Request, res: Response) => {
       conformPassword: hashedPassword,
     });
     if (newUser) {
-      res.status(200).json({ message: 'user created' });
+      res.status(201).json({ message: 'user created' });
     }
   } catch (error) {
     console.error(signup, error);
     res.status(500).json({ message: 'internal server error' });
   }
 };
-
+/**
+ * POST /signin
+ * @description Authenticate a user using their email and password.
+ * @param {object} req.body - Request body containing user credentials
+ * @param {string} req.body.email - User's email - example: "user@example.com"
+ * @param {string} req.body.password - User's password - example: "SecurePassword123"
+ * @returns {object} 200 - Signin successful
+ * @returns {object} 400 - Invalid credentials or bad request
+ * @returns {object} 500 - Internal Server Error
+ */
 export const signin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -66,7 +75,7 @@ export const signin = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       res.status(400).json({ Message: 'invalid credential' });
     }
-    const token = generateToken(user.id, user.email);
+    const token = generateToken(user.id, email);
 
     // Return the token in the response body along with user info
     return res.status(200).json({
@@ -78,7 +87,6 @@ export const signin = async (req: Request, res: Response) => {
         email: user.email,
       },
     });
-   
   } catch (error: any) {
     console.error('error in controller signin', error);
     return res.status(400).json({ message: 'internal server error' });
