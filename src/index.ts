@@ -6,12 +6,12 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { setupSwagger } from './swagger';
 import ngrok from '@ngrok/ngrok';
-import { Console } from 'node:console';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ?? 8000;
+let serverUrl = 'http://localhost:8080';
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -30,8 +30,6 @@ app.use('/auth', authRoute);
 
 app.set('sokeet', io);
 
-setupSwagger(app);
-
 server.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
@@ -42,7 +40,12 @@ ngrok
     authtoken: process.env.NGROK_AUTHTOKEN,
   })
   .then((listener) => {
-    console.log(`ngrok tnnel is establishing at: ${listener.url()}/api-docs  you can acces from there`);
+    const ngrokUrl = listener.url();
+    if (ngrokUrl != null) {
+      serverUrl = ngrokUrl;
+    }
+    console.log(`ngrok tunnel is establishing at: ${listener.url()}/api-docs  you can acces from there`);
+    setupSwagger(app, serverUrl);
   })
   .catch((err: any) => {
     console.log('Error in Ngrok', err);

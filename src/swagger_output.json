@@ -5,9 +5,12 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "localhost:8000",
+  "host": "6f75-111-119-49-233.ngrok-free.app",
   "basePath": "/",
-  "schemes": ["http"],
+  "schemes": [
+    "http",
+    "https"
+  ],
   "paths": {
     "/signup": {
       "post": {

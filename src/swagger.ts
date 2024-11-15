@@ -13,22 +13,22 @@ const doc = {
     description: 'Description of the API',
   },
   host: 'localhost:8000',
-  schemes: ['http'],
+  schemes: ['http', 'https'],
 };
 
 // Function to generate swagger_output.json if it doesn't exist
-const generateSwaggerFile = async () => {
+const generateSwaggerFile = async (domain: string) => {
   if (!fs.existsSync(outputFile)) {
-    console.log('Generating swagger_output.json...');
+    doc['host'] = domain;
     await swaggerAutogen()(outputFile, endpointsFiles, doc);
     console.log('swagger_output.json generated.');
   }
 };
 
 // Set up Swagger UI
-export const setupSwagger = async (app: Express): Promise<void> => {
+export const setupSwagger = async (app: Express, url: string): Promise<void> => {
   // Ensure swagger_output.json is generated
-  await generateSwaggerFile();
+  await generateSwaggerFile(url.split('//')[1]);
 
   const swaggerFile = require('./swagger_output.json'); // JSON file containing generated Swagger documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
