@@ -12,23 +12,23 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: '6409-2407-1400-aa3c-fb18-6173-61c5-de6f-97c6.ngrok-free.app/api-docs',
-  schemes: ['https'],
+  host: 'localhost:8000',
+  schemes: ['http', 'https'],
 };
 
 // Function to generate swagger_output.json if it doesn't exist
-const generateSwaggerFile = async () => {
+const generateSwaggerFile = async (domain: string) => {
   if (!fs.existsSync(outputFile)) {
-    console.log('Generating swagger_output.json...');
+    doc['host'] = domain;
     await swaggerAutogen()(outputFile, endpointsFiles, doc);
     console.log('swagger_output.json generated.');
   }
 };
 
 // Set up Swagger UI
-export const setupSwagger = async (app: Express): Promise<void> => {
+export const setupSwagger = async (app: Express, url: string): Promise<void> => {
   // Ensure swagger_output.json is generated
-  await generateSwaggerFile();
+  await generateSwaggerFile(url.split('//')[1]);
 
   const swaggerFile = require('./swagger_output.json'); // JSON file containing generated Swagger documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));

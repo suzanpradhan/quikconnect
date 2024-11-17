@@ -5,9 +5,10 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "6409-2407-1400-aa3c-fb18-6173-61c5-de6f-97c6.ngrok-free.app/api-docs",
+  "host": "caac-2407-1400-aa29-74c0-6016-d1c1-712d-cf5f.ngrok-free.app",
   "basePath": "/",
   "schemes": [
+    "http",
     "https"
   ],
   "paths": {
@@ -38,11 +39,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"

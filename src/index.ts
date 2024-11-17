@@ -6,19 +6,20 @@ import userInfoRoute from './routes/userInfo.route';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { setupSwagger } from './swagger';
-// import ngrok from '@ngrok/ngrok';
+import ngrok from '@ngrok/ngrok';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ?? 8000;
+let serverUrl = 'http://localhost:8080';
 
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT'],
+    methods: ['GET', 'POST'],
     credentials: true,
+    origin: 'http://localhost:8080',
   },
 });
 
@@ -31,22 +32,27 @@ app.use('/user', userInfoRoute);
 
 app.set('sokeet', io);
 
-setupSwagger(app);
-
 server.listen(PORT, () => {
   console.log(`server is running on port http://localhost:${PORT}`);
 });
 
-// ngrok
-//   .connect({
-//     port: 8000,
-//     authtoken: process.env.NGROK_AUTHTOKEN,
-//   })
-//   .then((listener) => {
-//     console.log(`ngrok tnnel is establishing at: ${listener.url()}/api-docs  you can acces from there`);
-//   })
-//   .catch((err: any) => {
-//     console.log('Error in Ngrok', err);
-//   });
+app.set('sokeet', io);
+
+ngrok
+  .connect({
+    port: 8000,
+    authtoken: process.env.NGROK_AUTHTOKEN,
+  })
+  .then((listener) => {
+    const ngrokUrl = listener.url();
+    if (ngrokUrl != null) {
+      serverUrl = ngrokUrl;
+    }
+    console.log(`ngrok tunnel is establishing at: ${listener.url()}/api-docs  you can acces from there`);
+    setupSwagger(app, serverUrl);
+  })
+  .catch((err: any) => {
+    console.log('Error in Ngrok', err);
+  });
 
 export default app;
