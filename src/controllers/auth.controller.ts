@@ -46,16 +46,7 @@ export const signup = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'internal server error' });
   }
 };
-/**
- * POST /signin
- * @description Authenticate a user using their email and password.
- * @param {object} req.body - Request body containing user credentials
- * @param {string} req.body.email - User's email - example: "user@example.com"
- * @param {string} req.body.password - User's password - example: "SecurePassword123"
- * @returns {object} 200 - Signin successful
- * @returns {object} 400 - Invalid credentials or bad request
- * @returns {object} 500 - Internal Server Error
- */
+
 export const signin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -99,11 +90,13 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
   try {
   } catch (error) {}
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
+    const { email } = req.body;
   } catch (error) {}
 };
