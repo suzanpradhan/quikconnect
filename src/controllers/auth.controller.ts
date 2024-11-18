@@ -4,17 +4,18 @@ import { Request, Response } from 'express';
 import { db } from '../migrate';
 import { eq } from 'drizzle-orm';
 import generateToken from '@/utils/generate.token';
+import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, conformPassword } = req.body;
-    if (!name || !email || !password || !conformPassword) {
+    const { name, email, password, confirmPassword } = req.body;
+    if (!name || !email || !password || !confirmPassword) {
       res.status(400).json({ Error: 'fill all feilds' });
     }
     if (password.length < 6) {
       return res.status(400).json({ Error: 'Password must be at least 6 characters long' });
     }
-    if (password != conformPassword) {
+    if (password != confirmPassword) {
       return res.status(400).json({ Error: "password don't match! use same password as before" });
     }
 
@@ -36,7 +37,7 @@ export const signup = async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      conformPassword: hashedPassword,
+      confirmPassword: hashedPassword,
     });
     if (newUser) {
       res.status(201).json({ message: 'user created' });
@@ -84,13 +85,38 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const resetPassword = async (req: AuthenticatedRequest, res: Response) => {
+  const { oldPassword, newPassword, confirmNewPassword } = req.body;
+
   try {
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ message: 'fill all the fields' });
+    }
+
+    const Id = req.Id; // from userInfo middleware, Id ma login gareko user ko token bata extract agareko id
+    if (!Id) {
+      return res.status(401).json({ message: 'Unauthorized User.' });
+    }
+
+    const user = await db.select().from(UserTable).where(eq(UserTable.id, Id)).execute();
+    if (!user || user.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const isOldPasswordMatch = await bcrypt.compare(oldPassword, user[0].password); //user[0], user lae arry ma linxa data so yasari gareko or user=user[0] garda ni hunxa
+    if (!isOldPasswordMatch) {
+      return res.status(400).json({ message: 'Old password is incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await db.update(UserTable).set({ password: hashedPassword, confirmPassword: hashedPassword }).where(eq(UserTable.id, Id)).execute();
+
+    res.status(200).json({ message: 'Password updated successfully.' });
   } catch (error) {}
 };
-
-export const resetPassword = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+export const logout = async (req: Request, res: Response) => {
   try {
   } catch (error) {}
 };
