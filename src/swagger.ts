@@ -12,7 +12,7 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: '192.168.1.8:8000',
+  host: '192.168.1.15:8000',
   schemes: ['http', 'https'],
 };
 

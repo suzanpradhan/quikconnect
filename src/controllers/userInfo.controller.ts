@@ -3,6 +3,7 @@ import { db } from '../migrate';
 import { UserTable } from '../schema/schema';
 import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { eq } from 'drizzle-orm';
+import multer from 'multer';
 
 export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
   const Id = req.Id; // Extract user ID from the request object  ra yo middleware bata ako
@@ -19,14 +20,39 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    return res.status(200).json({ user: getUser });
+    return res.status(200).json({ user: getUser[0] });
   } catch (error) {
     console.error('Error fetching user information:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-export const edictUserInfo = async (req: Request, res: Response) => {
+export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) => {
+  const Id = req.Id; // Retrieved from middleware
+  const { name } = req.body;
+
   try {
-  } catch (error) {}
+    // Fetch the current user
+    const user = await db
+      .select()
+      .from(UserTable)
+      .where(eq(UserTable.id, Id as string))
+      .execute();
+
+    if (!user || user.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update user's name
+    await db
+      .update(UserTable)
+      .set({ name })
+      .where(eq(UserTable.id, Id as string))
+      .execute();
+
+    return res.status(200).json({ message: 'Name updated successfully.' });
+  } catch (error) {
+    console.error('Error updating name:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
 };
