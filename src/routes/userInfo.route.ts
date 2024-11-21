@@ -6,5 +6,6 @@ const userInfoRouter = expres.Router();
 
 userInfoRouter.get('/userInfo', authenticateJWT, userInfo);
 userInfoRouter.put('/edictUserInfo', authenticateJWT, edictUserInfo);
+// userInfoRouter.put('/edictUserInfo', authenticateJWT, upload.single('avatar'), edictUserInfo);
 
 export default userInfoRouter;

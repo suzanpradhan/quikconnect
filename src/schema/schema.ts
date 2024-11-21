@@ -10,5 +10,5 @@ export const UserTable = pgTable('user', {
   resetTokenExpiry: timestamp('resetTokenExpiry'),
   nameUpdateAt: timestamp('nameUpdateAt'),
   phoneNumber: integer('phoneNumber'),
-  avtar: uuid('avtar'),
+  avtar: varchar('avtar'),
 });

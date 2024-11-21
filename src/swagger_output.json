@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.15:8000/auth",
+  "host": "192.168.1.21:8000/auth",
   "basePath": "/",
   "schemes": [
     "http",
@@ -258,6 +258,9 @@
               "type": "object",
               "properties": {
                 "name": {
+                  "example": "any"
+                },
+                "phoneNumber": {
                   "example": "any"
                 }
               }

@@ -29,8 +29,9 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
 
 export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) => {
   const Id = req.Id; // Retrieved from middleware
-  const { name } = req.body;
-
+  const upload = multer({ dest: 'pictures/' });
+  const { name, phoneNumber } = req.body;
+  const avatarPath = req.file?.path;
   try {
     // Fetch the current user
     const user = await db
@@ -43,16 +44,20 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) =>
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Update user's name
+    // const updates: Partial<typeof UserTable> = {};
+    // if (name) updates.name = name;
+    // if (phoneNumber) updates.phoneNumber = phoneNumber;
+    // if (avatarPath) updates.avtar = avatarPath as string;
+
     await db
       .update(UserTable)
-      .set({ name })
+      .set({name})
       .where(eq(UserTable.id, Id as string))
       .execute();
 
     return res.status(200).json({ message: 'Name updated successfully.' });
   } catch (error) {
-    console.error('Error updating name:', error);
+    console.error('Error updating userInfo:', error);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
