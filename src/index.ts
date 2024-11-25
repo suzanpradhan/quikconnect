@@ -21,7 +21,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //express default middleware
-app.use('/uploads', express.static(path.resolve(CONFIG.UPLOAD_DIR)));
+app.use('/uploads', express.static(path.join(__dirname, '..',  'uploads')));
 
 app.use('/api', authRoute, userInfoRoute);
 

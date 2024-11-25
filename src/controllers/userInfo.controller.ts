@@ -4,7 +4,7 @@ import { UserTable } from '../schema/schema';
 import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { eq } from 'drizzle-orm';
 import { CONFIG } from '@/config/dotenvConfig';
-import fs from 'fs'
+import fs from 'fs';
 
 export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
   const Id = req.Id; // Extract user ID from the request object  ra yo middleware bata ako
@@ -52,6 +52,7 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) =>
       return res.status(404).json({ message: 'User not found.' });
     }
     const avatarUrl = `${CONFIG.UPLOAD_DIR}${avatarFile.filename}`;
+    console.log("avatarurl from controller",avatarUrl)
     await db
       .update(UserTable)
       .set({ name, phoneNumber, gender, avatar: avatarUrl })

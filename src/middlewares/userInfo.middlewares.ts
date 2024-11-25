@@ -9,7 +9,7 @@ export interface AuthenticatedRequest extends Request {
 export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1];
 
-  console.log('token in middleware:', token);
+  console.log('token in user middleware:', token);
 
   if (!token) {
     return res.status(401).json({ message: 'Authentication token is required' });
