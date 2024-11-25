@@ -4,10 +4,10 @@ import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
 import { eq, and, gt } from 'drizzle-orm';
-import generateToken from '@/utils/generatetoken.utils';
+import generateToken from '../utils/generatetoken.utils';
 import validator from 'validator';
 
-import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
+import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { sendEmail } from '../utils/email.utills';
 
 export const signup = async (req: Request, res: Response) => {
@@ -122,7 +122,9 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
     await db.update(UserTable).set({ password: hashedPassword, confirmPassword: hashedPassword }).where(eq(UserTable.id, Id)).execute();
 
     res.status(200).json({ message: 'Password updated successfully.' });
-  } catch (error) {}
+  } catch (error) {
+    console.error('Error in controller changePassword', error);
+  }
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {
@@ -225,6 +227,5 @@ export const createNewPassword = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    
   } catch (error) {}
 };

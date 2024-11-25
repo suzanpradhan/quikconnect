@@ -1,4 +1,4 @@
-import { integer, varchar, date, uuid, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, varchar, uuid, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const UserTable = pgTable('user', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -9,6 +9,7 @@ export const UserTable = pgTable('user', {
   resetToken: text('resetToken'),
   resetTokenExpiry: timestamp('resetTokenExpiry'),
   nameUpdateAt: timestamp('nameUpdateAt'),
-  phoneNumber: integer('phoneNumber'),
-  avtar: varchar('avtar'),
+  phoneNumber: bigint({ mode: 'number' }),
+  gender: varchar('gender'),
+  avatar: varchar('avatar'),
 });

@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.21:8000/auth",
+  "host": "192.168.1.16:8001/api",
   "basePath": "/",
   "schemes": [
     "http",
@@ -243,7 +243,7 @@
       }
     },
     "/edictUserInfo": {
-      "put": {
+      "patch": {
         "description": "",
         "parameters": [
           {
@@ -262,6 +262,9 @@
                 },
                 "phoneNumber": {
                   "example": "any"
+                },
+                "gender": {
+                  "example": "any"
                 }
               }
             }
@@ -270,6 +273,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

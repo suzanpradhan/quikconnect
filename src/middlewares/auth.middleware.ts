@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
 export interface AuthenticatedRequest extends Request {
-  //new interface declare gareko tesko name AuthenticatedRequest ra yesma sabai property hunxa jun standard express:Request vako ra additional function, pro[erties add garna milxa like Id:string
+  //new interface declare gareko tesko name AuthenticatedRequest ra yesma sabai property hunxa jun standard express:Request vako ra additional function, properties add garna milxa like Id:string
   Id?: string; // Add a property to store user ID from the JWT token
 }
 

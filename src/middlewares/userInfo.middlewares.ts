@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import multer from 'multer';
 
 export interface AuthenticatedRequest extends Request {
   //new interface declare gareko tesko name AuthenticatedRequest ra yesma sabai property hunxa jun standard express:Request vako ra additional function, pro[erties add garna milxa like Id:string
@@ -31,6 +30,3 @@ export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: 
     return res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
-
-const upload = multer({ dest: 'pictures/' });
-

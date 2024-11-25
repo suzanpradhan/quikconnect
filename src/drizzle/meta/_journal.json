@@ -8,6 +8,20 @@
       "when": 1731487789211,
       "tag": "0000_salty_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1732178521166,
+      "tag": "0001_yummy_princess_powerful",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1732180405021,
+      "tag": "0002_chilly_hex",
+      "breakpoints": true
     }
   ]
 }

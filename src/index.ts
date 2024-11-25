@@ -1,40 +1,35 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoute from './routes/auth.route';
 import userInfoRoute from './routes/userInfo.route';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { setupSwagger } from './swagger';
-import multer from 'multer';
-
-dotenv.config();
+import { CONFIG } from './config/dotenvConfig';
+import path from 'path';
 
 const app = express();
-
-const PORT = process.env.PORT ?? 8000;
-let serverUrl = 'http://192.168.1.21:8000/auth';
-
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
     methods: ['GET', 'POST'],
     credentials: true,
-    origin: 'http://192.168.1.21:8000',
+    origin: CONFIG.BASE_URL,
   },
 });
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //express default middleware
+app.use('/uploads', express.static(path.resolve(CONFIG.UPLOAD_DIR)));
 
-app.use('/auth', authRoute, userInfoRoute);
+app.use('/api', authRoute, userInfoRoute);
 
 app.set('sokeet', io);
 
-setupSwagger(app, serverUrl);
+setupSwagger(app, `${CONFIG.BASE_URL}/api`);
 
-server.listen(PORT, () => {
-  console.log(`server is running on port http://192.168.1.21:${PORT}`);
-  console.log(`get api from http://192.168.1.21:${PORT}/api-docs`);
+server.listen(CONFIG.PORT, () => {
+  console.log(`server is running on ${CONFIG.BASE_URL}`);
+  console.log(`get api from ${CONFIG.BASE_URL}/api-docs`);
 });

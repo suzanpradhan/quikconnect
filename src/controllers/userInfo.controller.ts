@@ -1,9 +1,10 @@
 import { Response } from 'express';
 import { db } from '../migrate';
 import { UserTable } from '../schema/schema';
-import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
+import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { eq } from 'drizzle-orm';
-import multer from 'multer';
+import { CONFIG } from '@/config/dotenvConfig';
+import fs from 'fs'
 
 export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
   const Id = req.Id; // Extract user ID from the request object  ra yo middleware bata ako
@@ -29,9 +30,16 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
 
 export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) => {
   const Id = req.Id; // Retrieved from middleware
-  const upload = multer({ dest: 'pictures/' });
-  const { name, phoneNumber } = req.body;
-  const avatarPath = req.file?.path;
+  const { name, phoneNumber, gender } = req.body;
+  const avatarFile = req.file as Express.Multer.File;
+
+  if (!avatarFile) {
+    return res.status(400).json({ message: 'No avatar file uploaded.' });
+  }
+
+  if (!Id) {
+    return res.status(400).json({ message: 'user not found' });
+  }
   try {
     // Fetch the current user
     const user = await db
@@ -43,21 +51,17 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) =>
     if (!user || user.length === 0) {
       return res.status(404).json({ message: 'User not found.' });
     }
-
-    // const updates: Partial<typeof UserTable> = {};
-    // if (name) updates.name = name;
-    // if (phoneNumber) updates.phoneNumber = phoneNumber;
-    // if (avatarPath) updates.avtar = avatarPath as string;
-
+    const avatarUrl = `${CONFIG.UPLOAD_DIR}${avatarFile.filename}`;
     await db
       .update(UserTable)
-      .set({name})
+      .set({ name, phoneNumber, gender, avatar: avatarUrl })
       .where(eq(UserTable.id, Id as string))
       .execute();
 
-    return res.status(200).json({ message: 'Name updated successfully.' });
+    return res.status(200).json({ message: 'Credentials updated successfully.' });
   } catch (error) {
     console.error('Error updating userInfo:', error);
+    fs.unlinkSync(avatarFile.path);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };

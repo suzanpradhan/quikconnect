@@ -8,23 +8,14 @@ interface CustomMailOptions extends SendMailOptions {
 
 // Email sending
 export const sendEmail = async (to: string, subject: string, text: string): Promise<void> => {
-  const transporter: Transporter = nodemailer.createTransport(
-    // {
-    //   service: 'Gmail', // Email service provider
-    //   auth: {
-    //     user: process.env.EMAIL_USER, // Email account for sending emails
-    //     pass: process.env.EMAIL_PASS, // Password or app-specific password
-    //   },
-    // }
-    {
-      host: 'sandbox.smtp.mailtrap.io',
-      port: 2525,
-      auth: {
-        user: process.env.EMAIL_USER, //yesma user name dini
-        pass: process.env.EMAIL_PASS,
-      },
+  const transporter: Transporter = nodemailer.createTransport({
+    host: 'sandbox.smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+      user: process.env.EMAIL_USER, //yesma user name dini
+      pass: process.env.EMAIL_PASS,
     },
-  );
+  });
   console.log('transporter from utill', transporter);
   // Configure email options
   const mailOptions: CustomMailOptions = {
