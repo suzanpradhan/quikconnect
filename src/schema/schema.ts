@@ -14,17 +14,16 @@ export const UserTable = pgTable('user', {
 });
 
 export const ChatTable = pgTable('ChatTable', {
-  chatId: uuid('chatId').primaryKey(),
+  id: uuid('id').primaryKey(),
   name: varchar('name'),
   isGroupChat: boolean('isGroupChat').default(false),
   createdAt: timestamp('createdAt').defaultNow(),
 });
-
 export const ChatMembersTable = pgTable('ChatMember', {
   id: uuid('id').primaryKey().defaultRandom(),
   chatId: uuid('chatId')
     .notNull()
-    .references(() => ChatTable.chatId),
+    .references(() => ChatTable.id),
   userId: uuid('userId')
     .notNull()
     .references(() => UserTable.id),
@@ -36,7 +35,7 @@ export const MessageTable = pgTable('Messages', {
   id: uuid('id').primaryKey().defaultRandom(),
   chatId: uuid('chatId')
     .notNull()
-    .references(() => ChatTable.chatId),
+    .references(() => ChatTable.id),
   senderId: uuid('senderId')
     .notNull()
     .references(() => UserTable.id),
