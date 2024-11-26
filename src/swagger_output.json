@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.6:8001/api",
+  "host": "192.168.1.5:8001/api",
   "basePath": "/",
   "schemes": [
     "http",
