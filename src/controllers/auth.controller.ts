@@ -20,7 +20,7 @@ export const signup = async (req: Request, res: Response) => {
     if (password.length < 6) {
       return res.status(400).json({ Error: 'Password must be at least 6 characters long' });
     }
-    if (password != confirmPassword) {
+    if (password !== confirmPassword) {
       return res.status(400).json({ Error: "password don't match! use same password as before" });
     }
 
@@ -29,14 +29,9 @@ export const signup = async (req: Request, res: Response) => {
     if (!gmailRegex.test(email)) {
       return res.status(400).json({ error: 'Please use a valid Gmail address' });
     }
-    // if (validator.isEmail(email)) {
-    //   return res.status(400).json({ error: 'Please use a valid Gmail address' });
-    // }
-
     const checkUserExist = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
     if (checkUserExist.length > 0) {
-      // if (!checkUserExist)
-      return res.status(401).json({ message: 'mail already exist' });
+      return res.status(400).json({ message: 'mail already exist' });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -45,7 +40,6 @@ export const signup = async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      confirmPassword: hashedPassword,
     });
     if (newUser) {
       return res.status(201).json({ message: 'user created' });
@@ -63,7 +57,7 @@ export const signin = async (req: Request, res: Response) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide both email and password' });
     }
-
+    
     const getUsermail = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
     if (!getUsermail) {
       return res.status(400).json({ message: 'invalid credential' });
@@ -100,8 +94,8 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
     if (!oldPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ message: 'fill all the fields' });
     }
-
-    const Id = req.Id; // from userInfo middleware, Id ma login gareko user ko token bata extract agareko id
+    const { Id } = req;
+    // const Id = req.Id; //tala mathi ko same, from userInfo middleware, Id ma login gareko user ko token bata extract agareko id
     if (!Id) {
       return res.status(401).json({ message: 'Unauthorized User.' });
     }
@@ -119,7 +113,7 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await db.update(UserTable).set({ password: hashedPassword, confirmPassword: hashedPassword }).where(eq(UserTable.id, Id)).execute();
+    await db.update(UserTable).set({ password: hashedPassword }).where(eq(UserTable.id, Id)).execute();
 
     res.status(200).json({ message: 'Password updated successfully.' });
   } catch (error) {
@@ -214,7 +208,7 @@ export const createNewPassword = async (req: Request, res: Response) => {
     // Update the user's password and clear the reset token
     await db
       .update(UserTable)
-      .set({ password: hashedPassword, confirmPassword: confirmNewPassword, resetToken: null, resetTokenExpiry: null })
+      .set({ password: hashedPassword, resetToken: null, resetTokenExpiry: null })
       .where(eq(UserTable.id, user[0].id))
       .execute();
 

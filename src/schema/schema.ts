@@ -5,7 +5,7 @@ export const UserTable = pgTable('user', {
   name: varchar('name').notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   password: varchar('password').notNull(),
-  confirmPassword: varchar('confirmPassword').notNull(),
+  // confirmPassword: varchar('confirmPassword').notNull(),
   resetToken: text('resetToken'),
   resetTokenExpiry: timestamp('resetTokenExpiry'),
   nameUpdateAt: timestamp('nameUpdateAt'),
