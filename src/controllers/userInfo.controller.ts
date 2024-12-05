@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { db } from '../migrate';
-import { UserTable } from '../schema/schema';
+import { ChatMembersTable, ChatTable, UserTable } from '../schema/schema';
 import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { eq } from 'drizzle-orm';
 import { CONFIG } from '@/config/dotenvConfig';
@@ -21,9 +21,15 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    return res.status(200).json({ user: getUser[0] });
+    const getUserChatList = await db
+      .select({ chatId: ChatTable.id, chatName: ChatTable.name })
+      .from(ChatTable)
+      .innerJoin(ChatMembersTable, eq(ChatMembersTable.chatId, ChatTable.id))
+      .where(eq(ChatMembersTable.userId, Id));
+
+    return res.status(200).json({ userInfo: getUser[0], chatInfo: getUserChatList[0] });
   } catch (error) {
-    console.error('Error fetching user information:', error);
+    console.error(userInfo, error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -33,36 +39,60 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) =>
   const { name, phoneNumber, gender } = req.body;
   const avatarFile = req.file as Express.Multer.File;
 
-  if (!avatarFile) {
-    return res.status(400).json({ message: 'No avatar file uploaded.' });
-  }
-
   if (!Id) {
     return res.status(400).json({ message: 'user not found' });
   }
   try {
     // Fetch the current user
-    const user = await db
-      .select()
-      .from(UserTable)
-      .where(eq(UserTable.id, Id as string))
-      .execute();
+    const user = await db.select().from(UserTable).where(eq(UserTable.id, Id)).execute();
 
     if (!user || user.length === 0) {
       return res.status(404).json({ message: 'User not found.' });
     }
+
     const avatarUrl = `${CONFIG.UPLOAD_DIR}${avatarFile.filename}`;
-    console.log("avatarurl from controller",avatarUrl)
+    console.log('avatarurl from controller', avatarUrl);
     await db
       .update(UserTable)
       .set({ name, phoneNumber, gender, avatar: avatarUrl })
       .where(eq(UserTable.id, Id as string))
       .execute();
-
     return res.status(200).json({ message: 'Credentials updated successfully.' });
   } catch (error) {
-    console.error('Error updating userInfo:', error);
+    console.error(edictUserInfo, error);
     fs.unlinkSync(avatarFile.path);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+export const getAllUser = async (res: Response) => {
+  try {
+    const allUsers = await db.select().from(UserTable);
+    res.status(200).json({
+      message: true,
+      users: allUsers,
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users',
+    });
+  }
+};
+// export const getEachUser = async (req: AuthenticatedRequest, res: Response) => {
+//   const { id } = req.params;
+//   try {
+//     const getEachUsers = await db.select({}).from(UserTable).where(eq(UserTable.id, id));
+//     res.status(200).json({
+//       message: true,
+//       users: getEachUser,
+//     });
+//   } catch (error) {
+//     console.error('Error fetching users:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to fetch users',
+//     });
+//   }
+// };

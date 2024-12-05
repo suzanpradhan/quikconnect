@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "client": "ts-node src/client.ts",
     "gs": "ts-node ./src/swagger",
     "dev": " npm run gs && cross-env NODE_ENV=development nodemon -r tsconfig-paths/register --exec ts-node ./src/index.ts --files",
     "start": "cross-env NODE_ENV=production node ./build/src/index.js",
@@ -19,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@ngrok/ngrok": "^1.4.1",
+    "@socket.io/admin-ui": "^0.5.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
@@ -32,6 +34,7 @@
     "pg": "^8.13.0",
     "pino": "^9.5.0",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
     "up": "^1.0.2"

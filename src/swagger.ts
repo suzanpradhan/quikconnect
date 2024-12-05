@@ -4,7 +4,7 @@ import { Express } from 'express';
 import fs from 'fs';
 
 const outputFile = './swagger_output.json';
-const endpointsFiles = ['./src/routes/auth.route.ts', './src/routes/userInfo.route.ts'];
+const endpointsFiles = ['./src/routes/auth.route.ts', './src/routes/userInfo.route.ts', './src/routes/chat.route.ts'];
 
 // Swagger autogen configuration
 const doc = {
@@ -12,8 +12,24 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: '192.168.1.6:8001',
+  host: '192.168.1.12:8001',
   schemes: ['http', 'https'],
+  tags: [
+    {
+      name: 'chat',
+      description: 'Endpoints related to chat',
+    },
+
+    {
+      name: 'auth',
+      description: 'Authentication endpoints',
+    },
+    {
+      name: 'account',
+      description: 'Authentication endpoints',
+    },
+  ],
+  paths: {},
 };
 
 // Function to generate swagger_output.json if it doesn't exist

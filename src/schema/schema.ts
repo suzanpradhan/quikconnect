@@ -3,7 +3,7 @@ import { bigint, boolean, varchar, uuid, pgTable, text, timestamp } from 'drizzl
 export const UserTable = pgTable('user', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name').notNull(),
-  email: varchar('email', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password').notNull(),
   resetToken: text('resetToken'),
   resetTokenExpiry: timestamp('resetTokenExpiry'),
@@ -14,7 +14,8 @@ export const UserTable = pgTable('user', {
 });
 
 export const ChatTable = pgTable('ChatTable', {
-  id: uuid('id').primaryKey(),
+  //room
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name'),
   isGroupChat: boolean('isGroupChat').default(false),
   createdAt: timestamp('createdAt').defaultNow(),
@@ -38,6 +39,9 @@ export const MessageTable = pgTable('Messages', {
     .references(() => ChatTable.id),
   senderId: uuid('senderId')
     .notNull()
+    .references(() => UserTable.id),
+  receiverId: uuid('receiverId')
+    // .notNull()
     .references(() => UserTable.id),
   content: text('content').notNull(),
   messageType: varchar('messageType').default('text'),

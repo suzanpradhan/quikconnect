@@ -57,7 +57,7 @@ export const signin = async (req: Request, res: Response) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide both email and password' });
     }
-    
+
     const getUsermail = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
     if (!getUsermail) {
       return res.status(400).json({ message: 'invalid credential' });
@@ -82,7 +82,7 @@ export const signin = async (req: Request, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error('error in controller signin', error);
+    console.error(signin, error);
     return res.status(400).json({ message: 'internal server error' });
   }
 };
@@ -117,7 +117,8 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
 
     res.status(200).json({ message: 'Password updated successfully.' });
   } catch (error) {
-    console.error('Error in controller changePassword', error);
+    console.error(changePassword, error);
+    return res.status(400).json({ message: 'internal server error' });
   }
 };
 
@@ -170,7 +171,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       resetToken: `${resetToken}`,
     });
   } catch (error) {
-    console.error('Error in forgotPassword:', error);
+    console.error(forgotPassword, error);
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
@@ -214,12 +215,15 @@ export const createNewPassword = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: 'Password reset successfully.' });
   } catch (error) {
-    console.error('Error resetting password:', error);
+    console.error(createNewPassword, error);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
   try {
-  } catch (error) {}
+  } catch (error) {
+    console.error(logout, error);
+    return res.status(500).json({ message: 'internal server error' });
+  }
 };
