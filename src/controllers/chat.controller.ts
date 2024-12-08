@@ -2,17 +2,30 @@ import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { ChatTable, ChatMembersTable, MessageTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { eq ,and} from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { checkOrCreatePersonalChat } from '@/services/message.service';
-import { stringify } from 'querystring';
 
-// const sendMessage = async (req: Request, Request: AuthenticatedRequest, res: Response) => {
-//   const { message } = req.body;
-//   const id = Request.Id;
-//   const { receiverId } = req.params;
-//   try {
-//   } catch (error) {}
-// };
+export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
+  const { message } = req.body;
+  const senderId = req.Id;
+  const { chatId } = req.params;
+  const { receiverId } = req.params;
+  const file = req.file
+  try {
+    const newMessage = await db.insert(MessageTable).values({
+      chatId: chatId,
+      senderId: senderId as string,
+      message: message, //paxi content lai message ma change garni schema ma change garisi
+      receiverId: receiverId || null,
+    });
+    return res
+      .status(200)
+      .json({ success: true, responseMessage: 'message sent successfully', newMessage: message, messageContents: newMessage });
+  } catch (error) {
+    console.error(sendMessage, error);
+    return res.status(500).json({ messages: 'Internal server errror' });
+  }
+};
 
 export const chats = async (req: Request, res: Response) => {
   const { Id } = req.params;
@@ -105,12 +118,13 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
       userId: Id as string, // Add the user as a member of the room
       isAdmin: true,
     });
-
+    const joinLink = `http://192.168.1.16/${newChat.id}`;
     // Respond with the room ID
     res.status(201).json({
       success: true,
       message: 'Room created and user added successfully!',
       chatId: newChat.id,
+      joinLink,
     });
   } catch (error) {
     console.error('Error creating room:', error);
@@ -120,26 +134,28 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
 
 export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
   const { chatId } = req.params;
-  const Id = req.Id;
+  const Id = req.Id; // yesle un authorized user lai room join huna bata prevent garxa
 
   try {
-    // Directly try to insert without checking
-    await db.insert(ChatMembersTable).values({
-      chatId,
-      userId: Id as string,
-      isAdmin: false, // Default to member
+    // Directly try to insert without checking cause we use code (23505 to track unique key violation so that no duplicate chat will be strored in db
+    await db.transaction(async (trx) => {
+      await trx.insert(ChatMembersTable).values({
+        chatId,
+        userId: Id as string,
+        isAdmin: false,
+      }); //transaction kina use gareko?, yo operation either completely success huxa or completely failed in order to prevent inconsistant state in db
     });
-
     res.status(200).json({
+      joinLink: `${chatId}https://192.168.1.16/${chatId}`,
       message: 'Successfully joined the room.',
-      joinLink: `https://your-app-domain/join-room/${chatId}`,
     });
-  } catch (error:any) {
+  } catch (error: any) {
     if (error.code === '23505') {
+      //unique key violate garo vane yo error code auxa 23505 teslai detect
       return res.status(400).json({
         message: 'User is already a member of this room.',
-        joinLink: `https://your-app-domain/join-room/${chatId}`,// yo 2 ota link mathi tala ko lae same kam garxa Client side ma link dynamically render garna milcha.
-// If user already member cha, they can still use the provided link to access the room.
+        joinLink: `https://192.168.1.16/${chatId}`, // yo 2 ota link mathi tala ko lae same kam garxa Client side ma link dynamically render garna milcha.
+        // If user already member cha, they can still use the provided link to access the room.
       });
     }
 

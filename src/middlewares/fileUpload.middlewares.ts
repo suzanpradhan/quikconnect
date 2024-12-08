@@ -22,8 +22,9 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   }
 };
 
-export const upload = multer({
+export const uploadAvatar = multer({
   storage,
   fileFilter,
   limits: { fileSize: CONFIG.MAX_FILE_SIZE }, // Limit file size
 });
+
