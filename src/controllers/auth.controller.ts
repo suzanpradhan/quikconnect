@@ -9,6 +9,7 @@ import validator from 'validator';
 
 import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { sendEmail } from '../utils/email.utills';
+import { TokenService } from '@/services/token.service';
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -120,59 +121,29 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
     console.error(changePassword, error);
     return res.status(400).json({ message: 'internal server error' });
   }
-};
-
+}
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required.' });
-    }
-
     if (!validator.isEmail(email)) {
       return res.status(400).json({ message: 'Invalid email address.' });
     }
 
     const user = await db.select().from(UserTable).where(eq(UserTable.email, email)).execute();
-    if (!user || user.length === 0) {
+    if (!user?.length) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex'); //yesko function:to generate random reset token ,generates 32 random bytes (256 bits) of cryptographically secure random data and convert into hexadecimal string
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const tokenExpiry = new Date(Date.now() + 5 * 60 * 1000); //after 5 minutes it expirs
+    const { token, hash, expiry } = TokenService.generate();
+    await db.update(UserTable).set({ resetToken: hash, resetTokenExpiry: expiry }).where(eq(UserTable.id, user[0].id)).execute();
 
-    const hashedTokenandtokenExpiry = await db
-      .update(UserTable)
-      .set({ resetToken: hashedToken as string, resetTokenExpiry: tokenExpiry as Date })
-      .where(eq(UserTable.id, user[0].id))
-      .execute();
-    console.log('hashed token', hashedTokenandtokenExpiry);
-    // Send reset token via email
-    const resetURL = `${process.env.CLIENTRESET_URL}/reset-password/${resetToken}`;
+    const resetURL = `${process.env.CLIENTRESET_URL}/reset-password/${token}`;
+    await sendEmail(email, 'Password Reset Request', `Reset your password: ${resetURL}\nExpires in 5 minutes.`);
 
-    // Send reset email
-    console.log('reset Url contorller bata ako:', resetURL);
-    try {
-      sendEmail(
-        email,
-        'Password Reset Request',
-        `You requested a password reset. Click the link below to reset your password: \n\n ${resetURL} \n\nThis link will expire in 5 minutes.`,
-      );
-    } catch (emailError) {
-      console.error('Failed to send reset email:', emailError);
-      return res.status(500).json({ message: 'Could not send reset email. Please try again later.' });
-    }
-    console.log('send email frokm controller', sendEmail);
-    return res.status(200).json({
-      message: 'Password reset email sent.',
-      resetToken: `${resetToken}`,
-    });
+    return res.status(200).json({ message: 'Password reset email sent.' });
   } catch (error) {
-    console.error(forgotPassword, error);
-    res.status(500).json({ message: 'Internal server error.' });
+    console.error('forgotPassword:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
   }
 };
 export const createNewPassword = async (req: Request, res: Response) => {

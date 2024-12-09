@@ -7,7 +7,7 @@ import { CONFIG } from '@/config/dotenvConfig';
 import fs from 'fs';
 
 export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
-  const Id = req.Id; // Extract user ID from the request object  ra yo middleware bata ako
+  const { Id } = req; // Extract user ID from the request object  ra yo middleware bata ako
 
   if (!Id) {
     return res.status(400).json({ message: 'User ID is required' }); // id token ma attach gqreko xina login garda vane auxa
@@ -34,8 +34,8 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) => {
-  const Id = req.Id; // Retrieved from middleware
+export const edictUserInfo = async (req: AuthenticatedRequest, res: Response, next: unknown) => {
+  const { Id } = req; // Retrieved from middleware
   const { name, phoneNumber, gender } = req.body;
   const avatarFile = req.file as Express.Multer.File;
 
@@ -60,7 +60,11 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response) =>
     return res.status(200).json({ message: 'Credentials updated successfully.' });
   } catch (error) {
     console.error(edictUserInfo, error);
-    fs.unlinkSync(avatarFile.path);
+    try {
+      fs.unlinkSync(avatarFile.path);
+    } catch (unlinkError) {
+      console.error('Failed to delete avatar file:', unlinkError);
+    }
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
