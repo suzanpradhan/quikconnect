@@ -44,16 +44,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "ChatMember_chatId_ChatTable_id_fk": {
-          "name": "ChatMember_chatId_ChatTable_id_fk",
+        "ChatMember_chatId_chatTable_id_fk": {
+          "name": "ChatMember_chatId_chatTable_id_fk",
           "tableFrom": "ChatMember",
-          "tableTo": "ChatTable",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "tableTo": "chatTable",
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -61,12 +57,8 @@
           "name": "ChatMember_userId_user_id_fk",
           "tableFrom": "ChatMember",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -74,8 +66,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.ChatTable": {
-      "name": "ChatTable",
+    "public.chatTable": {
+      "name": "chatTable",
       "schema": "",
       "columns": {
         "id": {
@@ -156,16 +148,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Messages_chatId_ChatTable_id_fk": {
-          "name": "Messages_chatId_ChatTable_id_fk",
+        "Messages_chatId_chatTable_id_fk": {
+          "name": "Messages_chatId_chatTable_id_fk",
           "tableFrom": "Messages",
-          "tableTo": "ChatTable",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "tableTo": "chatTable",
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -173,12 +161,8 @@
           "name": "Messages_senderId_user_id_fk",
           "tableFrom": "Messages",
           "tableTo": "user",
-          "columnsFrom": [
-            "senderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["senderId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -259,9 +243,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

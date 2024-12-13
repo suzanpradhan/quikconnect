@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "ChatMember" (
 	"joinedAt" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "ChatTable" (
+CREATE TABLE IF NOT EXISTS "chatTable" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar,
 	"isGroupChat" boolean DEFAULT false,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "Messages" (
 --> statement-breakpoint
 ALTER TABLE "user" RENAME COLUMN "avtar" TO "avatar";--> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "ChatMember" ADD CONSTRAINT "ChatMember_chatId_ChatTable_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."ChatTable"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "ChatMember" ADD CONSTRAINT "ChatMember_chatId_chatTable_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."chatTable"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -36,7 +36,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "Messages" ADD CONSTRAINT "Messages_chatId_ChatTable_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."ChatTable"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "Messages" ADD CONSTRAINT "Messages_chatId_chatTable_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."chatTable"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

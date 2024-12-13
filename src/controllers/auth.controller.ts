@@ -1,4 +1,4 @@
-import { UserTable } from '../schema/schema';
+import { userTable } from '../schema/schema';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Request, Response } from 'express';
@@ -30,14 +30,14 @@ export const signup = async (req: Request, res: Response) => {
     if (!gmailRegex.test(email)) {
       return res.status(400).json({ error: 'Please use a valid Gmail address' });
     }
-    const checkUserExist = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
+    const checkUserExist = await db.select().from(userTable).where(eq(userTable.email, email)).limit(1);
     if (checkUserExist.length > 0) {
       return res.status(400).json({ message: 'mail already exist' });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = await db.insert(UserTable).values({
+    const newUser = await db.insert(userTable).values({
       name,
       email,
       password: hashedPassword,
@@ -59,7 +59,7 @@ export const signin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Please provide both email and password' });
     }
 
-    const getUsermail = await db.select().from(UserTable).where(eq(UserTable.email, email)).limit(1);
+    const getUsermail = await db.select().from(userTable).where(eq(userTable.email, email)).limit(1);
     if (!getUsermail) {
       return res.status(400).json({ message: 'invalid credential' });
     }
@@ -101,7 +101,7 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
       return res.status(401).json({ message: 'Unauthorized User.' });
     }
 
-    const user = await db.select().from(UserTable).where(eq(UserTable.id, Id)).execute();
+    const user = await db.select().from(userTable).where(eq(userTable.id, Id)).execute();
     if (!user || user.length === 0) {
       return res.status(404).json({ message: 'User not found.' });
     }
@@ -114,14 +114,14 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response) =
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await db.update(UserTable).set({ password: hashedPassword }).where(eq(UserTable.id, Id)).execute();
+    await db.update(userTable).set({ password: hashedPassword }).where(eq(userTable.id, Id)).execute();
 
     res.status(200).json({ message: 'Password updated successfully.' });
   } catch (error) {
     console.error(changePassword, error);
     return res.status(400).json({ message: 'internal server error' });
   }
-}
+};
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -129,13 +129,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid email address.' });
     }
 
-    const user = await db.select().from(UserTable).where(eq(UserTable.email, email)).execute();
+    const user = await db.select().from(userTable).where(eq(userTable.email, email)).execute();
     if (!user?.length) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
     const { token, hash, expiry } = TokenService.generate();
-    await db.update(UserTable).set({ resetToken: hash, resetTokenExpiry: expiry }).where(eq(UserTable.id, user[0].id)).execute();
+    await db.update(userTable).set({ resetToken: hash, resetTokenExpiry: expiry }).where(eq(userTable.id, user[0].id)).execute();
 
     const resetURL = `${process.env.CLIENTRESET_URL}/reset-password/${token}`;
     await sendEmail(email, 'Password Reset Request', `Reset your password: ${resetURL}\nExpires in 5 minutes.`);
@@ -161,11 +161,11 @@ export const createNewPassword = async (req: Request, res: Response) => {
     // Find the user by reset token and check expiry
     const user = await db
       .select()
-      .from(UserTable)
+      .from(userTable)
       .where(
         and(
-          eq(UserTable.resetToken, hashedToken), // Check if the hashed token matches
-          gt(UserTable.resetTokenExpiry, new Date()), // Check if the token is still valid,reset token bata kun date ma token generate vako dinxa ni new date lae aile ko date ani hamro token expiry time check hunxa ani yesle token validate garxa
+          eq(userTable.resetToken, hashedToken), // Check if the hashed token matches
+          gt(userTable.resetTokenExpiry, new Date()), // Check if the token is still valid,reset token bata kun date ma token generate vako dinxa ni new date lae aile ko date ani hamro token expiry time check hunxa ani yesle token validate garxa
         ),
       )
       .execute();
@@ -179,9 +179,9 @@ export const createNewPassword = async (req: Request, res: Response) => {
 
     // Update the user's password and clear the reset token
     await db
-      .update(UserTable)
+      .update(userTable)
       .set({ password: hashedPassword, resetToken: null, resetTokenExpiry: null })
-      .where(eq(UserTable.id, user[0].id))
+      .where(eq(userTable.id, user[0].id))
       .execute();
 
     return res.status(200).json({ message: 'Password reset successfully.' });

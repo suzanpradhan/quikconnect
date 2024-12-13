@@ -1,31 +1,120 @@
 import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
-import { ChatTable, ChatMembersTable, MessageTable } from '@/schema/schema';
+import { chatTable, chatMembersTable, messageTable, userSocketMap, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
 import { eq } from 'drizzle-orm';
-import { uploads } from '@/middlewares/messageFileUpload';
+import { io } from '../index';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { message } = req.body;
   const senderId = req.Id;
   const { chatId } = req.params;
-  const { receiverId } = req.params;
   const file = req.file;
+
   try {
-    const newMessage = await db.insert(MessageTable).values({
-      chatId: chatId,
+    const senderData = await db
+      .select({ senderName: userTable.name })
+      .from(userTable)
+      .where(eq(userTable.id, senderId as string));
+
+    if (senderData.length === 0) {
+      return res.status(404).json({ success: false, message: 'Sender not found.' });
+    }
+
+    const senderName = senderData[0].senderName;
+
+    // Save the message in the database
+    const newMessage = await db.insert(messageTable).values({
+      chatId,
       senderId: senderId as string,
-      message: message, //paxi content lai message ma change garni schema ma change garisi
-      receiverId: receiverId || null,
+      name: senderName,
+      message,
     });
-    return res
-      .status(200)
-      .json({ success: true, responseMessage: 'message sent successfully', newMessage: message, messageContents: newMessage });
+    try {
+      io.emit('joinChat', chatId);
+      io.to(chatId).emit('sendMessage', {
+        chatId,
+        senderId,
+        message,
+        name: senderName,
+        timestamp: new Date().toISOString(),
+      });
+
+      console.log(`Message sent to chat ${chatId} by user ${senderId}`);
+    } catch (error) {
+      console.error('error from chatcontroller send event', error);
+    }
+
+    // Return a success response
+    return res.status(200).json({
+      success: true,
+      responseMessage: 'Message sent successfully',
+      newMessage: {
+        chatId,
+        senderId,
+        name: senderName,
+        message,
+      },
+      messageContent: newMessage,
+    });
   } catch (error) {
-    console.error(sendMessage, error);
-    return res.status(500).json({ messages: 'Internal server errror' });
+    console.error('Error sending message:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
+//   const { message } = req.body;
+//   const senderId = req.Id;
+//   const { chatId } = req.params;
+//   const file = req.file;
+//   try {
+//     const name = await db
+//       .select({ senderName: userTable.name, senderAvatar: userTable.avatar })
+//       .from(userTable)
+//       .where(eq(userTable.id, senderId as string));
+
+//     const senderName = name[0].senderName;
+
+//     const newMessage = await db.insert(messageTable).values({
+//       chatId: chatId,
+//       senderId: senderId as string,
+//       name: senderName,
+//       message: message,
+//     });
+//     const userRecord = await db
+//       .select()
+//       .from(userSocketMap)
+//       .where(eq(userSocketMap.userId, senderId as string));
+
+//     if (userRecord.length > 0) {
+//       const socketId = userRecord[0].socketIds;
+
+//       io.to(chatId).emit('sendmessagefromsender', {
+//         senderId,
+//         message,
+//         timestamp: new Date().toISOString(),
+//       });
+//       console.log(`Message emitted to chat ${chatId} by user ${senderId} (socketId: ${socketId})`);
+//     } else {
+//       console.log(`User ${senderId} is not connected.`);
+//     }
+//     return res.status(200).json({
+//       success: true,
+//       responseMessage: 'message sent successfully',
+//       newMessage: {
+//         chatId,
+//         senderId,
+//         name: name,
+//         message,
+//       },
+//       messageContent: newMessage,
+//     });
+//   } catch (error) {
+//     console.error(sendMessage, error);
+//     return res.status(500).json({ messages: 'Internal server errror' });
+//   }
+// };
 
 // export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   const { message } = req.body;
@@ -42,7 +131,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //       const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
 //       const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
 
-//       const newMessage = await db.insert(MessageTable).values({
+//       const newMessage = await db.insert(messageTable).values({
 //         chatId,
 //         senderId: senderId as string,
 //         message: message || null,
@@ -51,12 +140,12 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //         mediaType,
 //       });
 
-//       messages.push(newMessage); 
+//       messages.push(newMessage);
 //     }
 
 //     // If there's only text, storing as a message without files
 //     if (!files?.length && message) {
-//       const newTextMessage = await db.insert(MessageTable).values({
+//       const newTextMessage = await db.insert(messageTable).values({
 //         chatId,
 //         senderId: senderId as string,
 //         message,
@@ -82,9 +171,9 @@ export const chats = async (req: Request, res: Response) => {
   try {
     const chats = await db
       .select()
-      .from(ChatTable)
-      .innerJoin(ChatMembersTable, eq(ChatMembersTable.chatId, ChatTable.id))
-      .where(eq(ChatMembersTable.userId, Id));
+      .from(chatTable)
+      .innerJoin(chatMembersTable, eq(chatMembersTable.chatId, chatTable.id))
+      .where(eq(chatMembersTable.userId, Id));
     return res.json(chats);
   } catch (error) {
     console.error('error in chat controller', error);
@@ -95,7 +184,7 @@ export const messages = async (req: Request, res: Response) => {
   const { chatId } = req.params;
 
   try {
-    const messages = await db.select().from(MessageTable).where(eq(MessageTable.chatId, chatId));
+    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId));
     return res.json(messages);
   } catch (error) {
     console.error('error in chat controller', error);
@@ -107,17 +196,17 @@ export const roomDetails = async (req: Request, res: Response) => {
   //chat details
   const { chatId } = req.params;
   try {
-    const chat = await db.select().from(ChatTable).where(eq(ChatTable.id, chatId)); // fetch chat
+    const chat = await db.select().from(chatTable).where(eq(chatTable.id, chatId)); // fetch chat
     if (!chat) {
       return res.status(404).json({ message: 'Chat (room) not found' });
     }
 
-    const members = await db.select().from(ChatMembersTable).where(eq(ChatMembersTable.chatId, chatId)); //fetch room
+    const members = await db.select().from(chatMembersTable).where(eq(chatMembersTable.chatId, chatId)); //fetch room
     if (!members) {
       return res.status(404).json({ message: 'Chat member not found' });
     }
 
-    const messages = await db.select().from(MessageTable).where(eq(MessageTable.chatId, chatId));
+    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId));
     if (!messages) {
       return res.status(404).json({ message: 'Chat member not found' });
     }
@@ -136,14 +225,14 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
     const { chatName } = req.body;
 
     const [newChat] = await db //yo new room ko data aaray ma xa so
-      .insert(ChatTable)
+      .insert(chatTable)
       .values({
         name: chatName || 'New Room',
         isGroupChat: false,
       })
       .returning(); // Use the .returning() to get the inserted row
     // Send the new room ID back to the client
-    await db.insert(ChatMembersTable).values({
+    await db.insert(chatMembersTable).values({
       chatId: newChat.id,
       userId: Id as string, // Add the user as a member of the room
       isAdmin: true,
@@ -169,7 +258,7 @@ export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Directly try to insert without checking cause we use code (23505 to track unique key violation so that no duplicate chat will be strored in db
     await db.transaction(async (trx) => {
-      await trx.insert(ChatMembersTable).values({
+      await trx.insert(chatMembersTable).values({
         chatId,
         userId: Id as string,
         isAdmin: false,

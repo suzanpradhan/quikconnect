@@ -176,3 +176,5 @@ server.key
 *.crt
 *.key
 client.ts
+client1.html
+client2.html

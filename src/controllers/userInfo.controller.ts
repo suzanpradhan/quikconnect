@@ -1,6 +1,6 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { ChatMembersTable, ChatTable, UserTable } from '../schema/schema';
+import { chatMembersTable, chatTable, userTable } from '../schema/schema';
 import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { eq } from 'drizzle-orm';
 import { CONFIG } from '@/config/dotenvConfig';
@@ -15,17 +15,17 @@ export const userInfo = async (req: AuthenticatedRequest, res: Response) => {
 
   try {
     // Fetch the user information from the database using the ID
-    const getUser = await db.select().from(UserTable).where(eq(UserTable.id, Id)); //userTable table ko id ra extract gareko id compare gareko
+    const getUser = await db.select().from(userTable).where(eq(userTable.id, Id)); //userTable table ko id ra extract gareko id compare gareko
 
     if (getUser.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     const getUserChatList = await db
-      .select({ chatId: ChatTable.id, chatName: ChatTable.name })
-      .from(ChatTable)
-      .innerJoin(ChatMembersTable, eq(ChatMembersTable.chatId, ChatTable.id))
-      .where(eq(ChatMembersTable.userId, Id));
+      .select({ chatId: chatTable.id, chatName: chatTable.name })
+      .from(chatTable)
+      .innerJoin(chatMembersTable, eq(chatMembersTable.chatId, chatTable.id))
+      .where(eq(chatMembersTable.userId, Id));
 
     return res.status(200).json({ userInfo: getUser[0], chatInfo: getUserChatList[0] });
   } catch (error) {
@@ -44,7 +44,7 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response, ne
   }
   try {
     // Fetch the current user
-    const user = await db.select().from(UserTable).where(eq(UserTable.id, Id)).execute();
+    const user = await db.select().from(userTable).where(eq(userTable.id, Id)).execute();
 
     if (!user || user.length === 0) {
       return res.status(404).json({ message: 'User not found.' });
@@ -53,9 +53,9 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response, ne
     const avatarUrl = `${CONFIG.UPLOAD_DIR}${avatarFile.filename}`;
     console.log('avatarurl from controller', avatarUrl);
     await db
-      .update(UserTable)
+      .update(userTable)
       .set({ name, phoneNumber, gender, avatar: avatarUrl })
-      .where(eq(UserTable.id, Id as string))
+      .where(eq(userTable.id, Id as string))
       .execute();
     return res.status(200).json({ message: 'Credentials updated successfully.' });
   } catch (error) {
@@ -69,9 +69,9 @@ export const edictUserInfo = async (req: AuthenticatedRequest, res: Response, ne
   }
 };
 
-export const getAllUser = async (res: Response) => {
+export const getAllUser = async (req: Request, res: Response) => {
   try {
-    const allUsers = await db.select().from(UserTable);
+    const allUsers = await db.select().from(userTable);
     res.status(200).json({
       message: true,
       users: allUsers,
@@ -84,19 +84,3 @@ export const getAllUser = async (res: Response) => {
     });
   }
 };
-// export const getEachUser = async (req: AuthenticatedRequest, res: Response) => {
-//   const { id } = req.params;
-//   try {
-//     const getEachUsers = await db.select({}).from(UserTable).where(eq(UserTable.id, id));
-//     res.status(200).json({
-//       message: true,
-//       users: getEachUser,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching users:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to fetch users',
-//     });
-//   }
-// };

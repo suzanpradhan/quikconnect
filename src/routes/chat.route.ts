@@ -9,14 +9,14 @@ const chatRouter = express.Router();
 
 chatRouter.get('/user/:Id', chats); // get all chats for a specific user ,/;userId
 chatRouter.get('/:chatId', roomDetails); // get all chat
-chatRouter.get('/:chatId/messages', messages); // get all messages for a specific chat ,/:chatId lae
+chatRouter.get('/messages/:chatId', messages); // get all messages for a specific chat ,/:chatId lae
 chatRouter.post('/create-room', authenticateJWT, createRoom);
 chatRouter.post('/join-room/:chatId', authenticateJWT, joinRoomLimiter, joinRoom);
-chatRouter.post('/:chatId/send-message', authenticateJWT, sendMessage);
-chatRouter.post(
-  '/send-message/:chatId/:receiverId?', // receiver id can be null
-  uploads.array('files', 5),
-  validateFileUpload,
-  sendMessage,
-);
+chatRouter.post('/send-message/:chatId', authenticateJWT, sendMessage);
+// chatRouter.post(
+//   '/send-message/:chatId/:receiverId?', // receiver id can be null
+//   uploads.array('files', 5),
+//   validateFileUpload,
+//   sendMessage,
+// );
 export default chatRouter;

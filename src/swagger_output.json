@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.5:8001/api",
+  "host": "192.168.1.7:8001/api",
   "basePath": "/",
   "tags": [
     {
@@ -361,7 +361,7 @@
         }
       }
     },
-    "/{chatId}/messages": {
+    "/messages/{chatId}": {
       "get": {
         "description": "",
         "parameters": [
@@ -455,7 +455,7 @@
         }
       }
     },
-    "/{chatId}/send-message": {
+    "/send-message/{chatId}": {
       "post": {
         "description": "",
         "parameters": [
@@ -493,47 +493,8 @@
           "403": {
             "description": "Forbidden"
           },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/send-message/{chatId}/{receiverId?}": {
-      "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "receiverId?",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
