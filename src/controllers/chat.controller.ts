@@ -6,12 +6,12 @@ import { eq } from 'drizzle-orm';
 import { io } from '../index';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-  const { message } = req.body;
-  const senderId = req.Id;
-  const { chatId } = req.params;
-  const file = req.file;
+  const { message } = req.body; // Extract message from the request body
+  const senderId = req.Id; // Authenticated user ID
+  const { chatId } = req.params; // Chat ID from the request parameters
 
   try {
+    // Fetch sender details from the database
     const senderData = await db
       .select({ senderName: userTable.name })
       .from(userTable)
@@ -30,20 +30,17 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       name: senderName,
       message,
     });
-    try {
-      io.emit('joinChat', chatId);
-      io.to(chatId).emit('sendMessage', {
-        chatId,
-        senderId,
-        message,
-        name: senderName,
-        timestamp: new Date().toISOString(),
-      });
 
-      console.log(`Message sent to chat ${chatId} by user ${senderId}`);
-    } catch (error) {
-      console.error('error from chatcontroller send event', error);
-    }
+    // Emit the message to all clients in the chat room
+    io.to(chatId).emit('receiveMessage', {
+      chatId,
+      senderId,
+      message,
+      name: senderName,
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log(`Message sent to chat ${chatId} by user ${senderId}`);
 
     // Return a success response
     return res.status(200).json({
@@ -63,58 +60,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-// export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-//   const { message } = req.body;
-//   const senderId = req.Id;
-//   const { chatId } = req.params;
-//   const file = req.file;
-//   try {
-//     const name = await db
-//       .select({ senderName: userTable.name, senderAvatar: userTable.avatar })
-//       .from(userTable)
-//       .where(eq(userTable.id, senderId as string));
 
-//     const senderName = name[0].senderName;
-
-//     const newMessage = await db.insert(messageTable).values({
-//       chatId: chatId,
-//       senderId: senderId as string,
-//       name: senderName,
-//       message: message,
-//     });
-//     const userRecord = await db
-//       .select()
-//       .from(userSocketMap)
-//       .where(eq(userSocketMap.userId, senderId as string));
-
-//     if (userRecord.length > 0) {
-//       const socketId = userRecord[0].socketIds;
-
-//       io.to(chatId).emit('sendmessagefromsender', {
-//         senderId,
-//         message,
-//         timestamp: new Date().toISOString(),
-//       });
-//       console.log(`Message emitted to chat ${chatId} by user ${senderId} (socketId: ${socketId})`);
-//     } else {
-//       console.log(`User ${senderId} is not connected.`);
-//     }
-//     return res.status(200).json({
-//       success: true,
-//       responseMessage: 'message sent successfully',
-//       newMessage: {
-//         chatId,
-//         senderId,
-//         name: name,
-//         message,
-//       },
-//       messageContent: newMessage,
-//     });
-//   } catch (error) {
-//     console.error(sendMessage, error);
-//     return res.status(500).json({ messages: 'Internal server errror' });
-//   }
-// };
 
 // export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   const { message } = req.body;
