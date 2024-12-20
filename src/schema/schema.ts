@@ -57,12 +57,12 @@ export const messageTable = pgTable('messages', {
     .references(() => userTable.id),
   receiverId: uuid('receiverId')
     .references(() => userTable.id), // Optional receiverId
-  name: varchar('name').notNull(), // No foreign key, simple column
+  name: varchar('name').notNull(), 
   message: text('message').notNull(),
   messageType: varchar('messageType').default('text'),
-  createdAt: timestamp('createdAt').defaultNow(),
-  attachmentURL: varchar('attachmentURL'), // Changed from uuid to varchar
-  mediaType: varchar('mediaType'), // Changed from uuid to varchar
+  timestamp: timestamp('createdAt').defaultNow(),
+  attachmentURL: varchar('attachmentURL'), 
+  mediaType: varchar('mediaType'), 
 });
 
 // User-Socket Map Table

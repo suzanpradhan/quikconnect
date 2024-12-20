@@ -12,7 +12,6 @@ const pool = new Pool({
     rejectUnauthorized: false, // we may want to handle SSL in production differently
   },
 });
-
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
 //   ssl: {

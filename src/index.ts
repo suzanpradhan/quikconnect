@@ -67,7 +67,7 @@ export const io = new Server(server, {
     methods: ['GET', 'POST'],
     credentials: true,
     // origin: '*',
-    origin: ['ws://192.168.1.5433:8001', 'http://192.168.1.8:8001', 'http://127.0.0.1.5433','http://127.0.0.1:5500',
+    origin: ['wss://192.168.1.5433:8001','ws://192.168.1.5433:8001', 'http://192.168.1.8:8001', 'http://127.0.0.1.5433','http://127.0.0.1:5500',
       CONFIG.BASE_URL],
     allowedHeaders: ['Content-Type', 'Authorization'],
   },

@@ -6,10 +6,9 @@ import { eq } from 'drizzle-orm';
 import { io } from '../index';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-  const { message } = req.body; // Extract message from the request body
-  const senderId = req.Id; // Authenticated user ID
-  const { chatId } = req.params; // Chat ID from the request parameters
-
+  const { message } = req.body; 
+  const senderId = req.Id; 
+  const { chatId } = req.params; 
   try {
     // Fetch sender details from the database
     const senderData = await db
@@ -22,7 +21,9 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const senderName = senderData[0].senderName;
-
+//     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
+//  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
+ 
     // Save the message in the database
     const newMessage = await db.insert(messageTable).values({
       chatId,
@@ -31,12 +32,11 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       message,
     });
 
-    // Emit the message to all clients in the chat room
+    // Emit the message to all clients in the chat room using Socket.IO
     io.to(chatId).emit('receiveMessage', {
-      chatId,
       senderId,
-      message,
       name: senderName,
+      message,
       timestamp: new Date().toISOString(),
     });
 
@@ -55,12 +55,62 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       messageContent: newMessage,
     });
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.error(sendMessage,'Error sending message:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+// export const sendFileMessage = async(req:AuthenticatedRequest,res:Response,request:Express.Multer.File[])=>{
+// const file = request[0];
+// const senderId= req.Id;
+// const {chatId} = req.params;
 
+//   try {
+//     const senderData = await db
+//     .select({ senderName: userTable.name })
+//     .from(userTable)
+//     .where(eq(userTable.id, senderId as string));
+
+//   if (senderData.length === 0) {
+//     return res.status(404).json({ success: false, message: 'Sender not found.' });
+//   }
+
+//   const senderName = senderData[0].senderName;
+
+//   const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
+//   const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
+  
+//   const sendFile = await db.insert(messageTable).values({
+//     attachmentURL: attachmentUrl ,
+//     mediaType,
+//     name:senderName ,
+//     message,
+//     senderId: senderId as string,
+//     chatId,
+//   })
+//   console.log('file uploaded uploaded successfully',sendFile)
+//   return res.status(200).json({fileuploaded:sendFileMessage})
+//   } catch (error) {
+//     console.log(sendFileMessage,error)
+//     return res.status(400).json({message:'internal server error'})
+//   }
+// }
+
+export const deleteMessages= async(req:Request,res:Response)=>{
+ try {
+  const {messageId}= req.params;
+
+  const [deleteMessage] = await db.delete(messageTable)
+  .where(eq(messageTable.id,messageId))
+  .returning();  
+
+  console.log('deleted message',deleteMessage)
+  return res.status(200).json({message:deleteMessage})
+ } catch (error) {
+  console.log('error in deleting message')
+  return res.status(400).json({message:"internal server error"})
+ }  
+}
 // export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   const { message } = req.body;
 //   const senderId = req.Id;
