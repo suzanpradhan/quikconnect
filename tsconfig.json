@@ -23,6 +23,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["process.env.d.ts", "./**/*.ts", "src/migrate.ts"],
+  "include": ["process.env.d.ts", "./**/*.ts","./src/**/*.ts","src/migrate.ts"],
   "exclude": ["node_modules"]
 }

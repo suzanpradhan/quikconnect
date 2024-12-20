@@ -168,3 +168,13 @@ __pycache__
 
 # === Rules for C++ development ===
 compile_commands.json
+
+#uploads
+uploads/
+server.cert
+server.key
+*.crt
+*.key
+client.ts
+client1.html
+client2.html
