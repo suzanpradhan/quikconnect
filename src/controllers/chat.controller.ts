@@ -61,7 +61,6 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 
-
 // export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   const { message } = req.body;
 //   const senderId = req.Id;

@@ -1,29 +1,33 @@
 import { jsonb, uniqueIndex } from 'drizzle-orm/pg-core';
 import { bigint, boolean, varchar, uuid, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const userTable = pgTable('user', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name').notNull(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  password: varchar('password').notNull(),
-  resetToken: text('resetToken'),
-  resetTokenExpiry: timestamp('resetTokenExpiry'),
-  nameUpdateAt: timestamp('nameUpdateAt'),
+export const userTable = pgTable(
+  'user',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name').notNull(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    password: varchar('password').notNull(),
+    resetToken: text('resetToken'),
+    resetTokenExpiry: timestamp('resetTokenExpiry'),
+    nameUpdateAt: timestamp('nameUpdateAt'),
+    phoneNumber: bigint({ mode: 'number' }),
+    gender: varchar('gender'),
+    avatar: varchar('avatar'),
+  },
+);
 
-  phoneNumber: bigint({ mode: 'number' }),
-  gender: varchar('gender'),
-  avatar: varchar('avatar'),
-});
-
-export const chatTable = pgTable('chat-table', {
-  //room
+// Chat Table
+export const chatTable = pgTable('chat_table', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name'),
   isGroupChat: boolean('isGroupChat').default(false),
   createdAt: timestamp('createdAt').defaultNow(),
 });
+
+// Chat Members Table
 export const chatMembersTable = pgTable(
-  'chat-member',
+  'chat_member',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     chatId: uuid('chatId')
@@ -37,11 +41,12 @@ export const chatMembersTable = pgTable(
   },
   (table) => {
     return {
-      uniqueChatUser: uniqueIndex('uniqueChatUser').on(table.chatId, table.userId), // yo le unique key violation detect garerxa, 23505
+      uniqueChatUser: uniqueIndex('unique_chat_user').on(table.chatId, table.userId), // Fixed naming for clarity
     };
   },
 );
 
+// Message Table
 export const messageTable = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
   chatId: uuid('chatId')
@@ -51,18 +56,18 @@ export const messageTable = pgTable('messages', {
     .notNull()
     .references(() => userTable.id),
   receiverId: uuid('receiverId')
-    // .notNull()
-    .references(() => userTable.id),
-  name: varchar('name').references(() => userTable.name),
-
+    .references(() => userTable.id), // Optional receiverId
+  name: varchar('name').notNull(), // No foreign key, simple column
   message: text('message').notNull(),
   messageType: varchar('messageType').default('text'),
   createdAt: timestamp('createdAt').defaultNow(),
-  attachmentURL: uuid('attachmentURL'),
-  mediaType: uuid('mediaType'),
+  attachmentURL: varchar('attachmentURL'), // Changed from uuid to varchar
+  mediaType: varchar('mediaType'), // Changed from uuid to varchar
 });
+
+// User-Socket Map Table
 export const userSocketMap = pgTable('user_socket_map', {
   userId: text('user_id').primaryKey(),
-  socketIds: jsonb('socket_ids').notNull().default([]), 
+  socketIds: jsonb('socket_ids').notNull().default([]),
   lastActive: timestamp('last_active').defaultNow(),
 });
