@@ -4,7 +4,6 @@ import { messageTable, userSocketMap, userTable } from './schema/schema'; // Rep
 import { eq } from 'drizzle-orm';
 
 export const socketLogic = (io: Server) => {
- 
   io.on('connection', (socket) => {
     console.log(`User connected with socket ID: ${socket.id}`);
 
@@ -50,37 +49,29 @@ export const socketLogic = (io: Server) => {
         console.error('Error handling sendMessage:', error);
       }
     });
-
     // Handle user disconnect
     socket.on('disconnect', () => {
       console.log(`User with socket ID ${socket.id} disconnected`);
     });
   });
-
 };
-
-
-
-
 
 // import { Server } from 'socket.io';
 
 // const activeUsers = new Map();
-
 
 // export const socketLogic = (io: Server) => {
 //   io.on('connection', (socket) => {
 //     console.log(`User connected with socket ID: ${socket.id}`);
 //     const userId = socket.handshake.query.userId;
 
-//   if (activeUsers.has(userId)) {
-//     socket.disconnect(true);
-//     console.log(`Duplicate connection detected for user: ${userId}`);
-//   } else {
-//     activeUsers.set(userId, socket.id);
-//     socket.on("disconnect", () => activeUsers.delete(userId));
-//   }
-
+//     if (activeUsers.has(userId)) {
+//       socket.disconnect(true);
+//       console.log(`Duplicate connection detected for user: ${userId}`);
+//     } else {
+//       activeUsers.set(userId, socket.id);
+//       socket.on('disconnect', () => activeUsers.delete(userId));
+//     }
 
 //     // Join a chat room
 //     socket.on('joinChat', (chatId) => {

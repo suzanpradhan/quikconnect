@@ -1,21 +1,19 @@
+import { time } from 'console';
 import { jsonb, uniqueIndex } from 'drizzle-orm/pg-core';
 import { bigint, boolean, varchar, uuid, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const userTable = pgTable(
-  'user',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    name: varchar('name').notNull(),
-    email: varchar('email', { length: 255 }).notNull().unique(),
-    password: varchar('password').notNull(),
-    resetToken: text('resetToken'),
-    resetTokenExpiry: timestamp('resetTokenExpiry'),
-    nameUpdateAt: timestamp('nameUpdateAt'),
-    phoneNumber: bigint({ mode: 'number' }),
-    gender: varchar('gender'),
-    avatar: varchar('avatar'),
-  },
-);
+export const userTable = pgTable('user', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name').notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  password: varchar('password').notNull(),
+  resetToken: text('resetToken'),
+  resetTokenExpiry: timestamp('resetTokenExpiry'),
+  nameUpdateAt: timestamp('nameUpdateAt'),
+  phoneNumber: bigint({ mode: 'number' }),
+  gender: varchar('gender'),
+  avatar: varchar('avatar'),
+});
 
 // Chat Table
 export const chatTable = pgTable('chat_table', {
@@ -36,7 +34,10 @@ export const chatMembersTable = pgTable(
     userId: uuid('userId')
       .notNull()
       .references(() => userTable.id),
+    receiverId: uuid('receiverId').references(() => userTable.id),
     isAdmin: boolean('isAdmin').default(false),
+    memberName: varchar('memberName'),
+    creatorName: varchar('creatorName'),
     joinedAt: timestamp('joinedAt').defaultNow(),
   },
   (table) => {
@@ -55,14 +56,13 @@ export const messageTable = pgTable('messages', {
   senderId: uuid('senderId')
     .notNull()
     .references(() => userTable.id),
-  receiverId: uuid('receiverId')
-    .references(() => userTable.id), // Optional receiverId
-  name: varchar('name').notNull(), 
+  receiverId: uuid('receiverId').references(() => userTable.id), // Optional receiverId
+  name: varchar('name').notNull(),
   message: text('message').notNull(),
   messageType: varchar('messageType').default('text'),
   timestamp: timestamp('createdAt').defaultNow(),
-  attachmentURL: varchar('attachmentURL'), 
-  mediaType: varchar('mediaType'), 
+  attachmentURL: varchar('attachmentURL'),
+  mediaType: varchar('mediaType'),
 });
 
 // User-Socket Map Table
@@ -70,4 +70,10 @@ export const userSocketMap = pgTable('user_socket_map', {
   userId: text('user_id').primaryKey(),
   socketIds: jsonb('socket_ids').notNull().default([]),
   lastActive: timestamp('last_active').defaultNow(),
+});
+
+export const blackListToken = pgTable('black-list-token', {
+  id: varchar('id').notNull().primaryKey(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  expiresAt: timestamp('expiresAt').notNull(),
 });

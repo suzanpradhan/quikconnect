@@ -1,4 +1,4 @@
-import { userTable } from '../schema/schema';
+import { userTable, blackListToken } from '../schema/schema';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Request, Response } from 'express';
@@ -10,6 +10,7 @@ import validator from 'validator';
 import { AuthenticatedRequest } from '../middlewares/userInfo.middlewares';
 import { sendEmail } from '../utils/email.utills';
 import { TokenService } from '@/services/token.service';
+import Jwt from 'jsonwebtoken';
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -60,7 +61,7 @@ export const signin = async (req: Request, res: Response) => {
     }
 
     const getUsermail = await db.select().from(userTable).where(eq(userTable.email, email)).limit(1);
-    if (!getUsermail) {
+    if (getUsermail.length === 0) {
       return res.status(400).json({ message: 'invalid credential' });
     }
 
@@ -193,6 +194,31 @@ export const createNewPassword = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
+    const token = req.headers.authorization?.split('')[1];
+
+    if (!token) {
+      return res.status(400).json({ message: 'token doesnot exist,authorization token is required' });
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(400).json({ message: 'jwt_secret key is not defined ' });
+    }
+
+    const decoded = Jwt.verify(token, secret) as { Id: string };
+    console.log('decoded id from logut controller', decoded);
+
+    // await db.insert(blackListToken).values({
+    //   token,
+
+    // });
+    // await addTokenTo
+    //
+    //
+    //
+    //
+    res.clearCookie('auth_token'); // cookies use gareko xa  token store garna vane, clear the cookie
+    res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
     console.error(logout, error);
     return res.status(500).json({ message: 'internal server error' });

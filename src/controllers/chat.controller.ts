@@ -2,13 +2,15 @@ import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { chatTable, chatMembersTable, messageTable, userSocketMap, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { io } from '../index';
+import { isMemberName } from 'typescript';
+import { join } from 'path';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-  const { message } = req.body; 
-  const senderId = req.Id; 
-  const { chatId } = req.params; 
+  const { message } = req.body;
+  const senderId = req.Id;
+  const { chatId } = req.params;
   try {
     // Fetch sender details from the database
     const senderData = await db
@@ -21,9 +23,9 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const senderName = senderData[0].senderName;
-//     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
-//  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
- 
+    //     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
+    //  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
+
     // Save the message in the database
     const newMessage = await db.insert(messageTable).values({
       chatId,
@@ -55,7 +57,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       messageContent: newMessage,
     });
   } catch (error) {
-    console.error(sendMessage,'Error sending message:', error);
+    console.error(sendMessage, 'Error sending message:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -79,16 +81,16 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 
 //   const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
 //   const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
-  
-//   const sendFile = await db.insert(messageTable).values({
-//     attachmentURL: attachmentUrl ,
-//     mediaType,
-//     name:senderName ,
-//     message,
-//     senderId: senderId as string,
-//     chatId,
-//   })
-//   console.log('file uploaded uploaded successfully',sendFile)
+
+//   // const sendFile = await db.insert(messageTable).values({
+//   //   attachmentURL: attachmentUrl ,
+//   //   mediaType,
+//   //   name:senderName ,
+//   //   ,
+//   //   senderId: senderId as string,
+//   //   chatId,
+//   // })
+//   console.log('file uploaded uploaded successfully',)
 //   return res.status(200).json({fileuploaded:sendFileMessage})
 //   } catch (error) {
 //     console.log(sendFileMessage,error)
@@ -96,21 +98,24 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   }
 // }
 
-export const deleteMessages= async(req:Request,res:Response)=>{
- try {
-  const {messageId}= req.params;
+export const deleteMessages = async (req: Request, res: Response) => {
+  try {
+    const { messageId } = req.params;
+    const { chatId } = req.params;
 
-  const [deleteMessage] = await db.delete(messageTable)
-  .where(eq(messageTable.id,messageId))
-  .returning();  
+    const [deleteMessage] = await db.delete(messageTable).where(eq(messageTable.id, messageId)).returning();
 
-  console.log('deleted message',deleteMessage)
-  return res.status(200).json({message:deleteMessage})
- } catch (error) {
-  console.log('error in deleting message')
-  return res.status(400).json({message:"internal server error"})
- }  
-}
+    io.to(chatId).emit('deleteMessage', {
+      chatId,
+    });
+
+    console.log('deleted message', deleteMessage);
+    return res.status(200).json({ message: 'message delete successfully' });
+  } catch (error) {
+    console.log('error in deleting message');
+    return res.status(400).json({ message: 'internal server error' });
+  }
+};
 // export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
 //   const { message } = req.body;
 //   const senderId = req.Id;
@@ -187,7 +192,7 @@ export const messages = async (req: Request, res: Response) => {
   }
 };
 
-export const roomDetails = async (req: Request, res: Response) => {
+export const roomDetailsOrChatMembers = async (req: Request, res: Response) => {
   //chat details
   const { chatId } = req.params;
   try {
@@ -201,12 +206,7 @@ export const roomDetails = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Chat member not found' });
     }
 
-    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId));
-    if (!messages) {
-      return res.status(404).json({ message: 'Chat member not found' });
-    }
-
-    return res.json({ chat, members, messages });
+    return res.json({ chat, members });
   } catch (error) {
     console.error('Error in getRoomDetails controller', error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -219,15 +219,22 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
     const { Id } = req;
     const { chatName } = req.body;
 
+    const [creatorData] = await db
+      .select({ name: userTable.name })
+      .from(userTable)
+      .where(eq(userTable.id, Id as string));
+
     const [newChat] = await db //yo new room ko data aaray ma xa so
       .insert(chatTable)
       .values({
         name: chatName || 'New Room',
-        isGroupChat: false,
+        isGroupChat: true,
       })
       .returning(); // Use the .returning() to get the inserted row
     // Send the new room ID back to the client
     await db.insert(chatMembersTable).values({
+      memberName: creatorData.name as unknown as string,
+      creatorName: creatorData.name as unknown as string,
       chatId: newChat.id,
       userId: Id as string, // Add the user as a member of the room
       isAdmin: true,
@@ -238,6 +245,9 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
       success: true,
       message: 'Room created and user added successfully!',
       chatId: newChat.id,
+      userId: Id as string,
+      creatorName: creatorData.name,
+      memberName: creatorData.name,
       joinLink,
     });
   } catch (error) {
@@ -248,19 +258,33 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
 
 export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
   const { chatId } = req.params;
-  const { Id } = req; // yesle un authorized user lai room join huna bata prevent garxa
+  // const { Id } = req; // yesle un authorized user lai room join huna bata prevent garxa
+  const { receiverId } = req.params;
 
   try {
+    const [joinData] = await db //add garna la ko member ko data
+      .select({ id: userTable.id, name: userTable.name })
+      .from(userTable)
+      .where(eq(userTable.id, receiverId as string))
+      .limit(1);
+
+    if (!joinData) {
+      return res.status(404).json({ message: 'Receiver not found.' });
+    }
+
     // Directly try to insert without checking cause we use code (23505 to track unique key violation so that no duplicate chat will be strored in db
     await db.transaction(async (trx) => {
       await trx.insert(chatMembersTable).values({
+        memberName: joinData.name,
         chatId,
-        userId: Id as string,
+        userId: joinData.id,
         isAdmin: false,
       }); //transaction kina use gareko?, yo operation either completely success huxa or completely failed in order to prevent inconsistant state in db
     });
     res.status(200).json({
       joinLink: `${chatId}`,
+      joinUserId: joinData.id as string,
+      joinUserName: joinData.name,
       message: 'Successfully joined the room.',
     });
   } catch (error: any) {
@@ -275,5 +299,140 @@ export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
 
     console.error('Error joining room:', error);
     res.status(500).json({ message: 'Failed to join the room.' });
+  }
+};
+
+// export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response) => {
+//   try {
+//     const { Id } = req;
+//     const { receiverId } = req.params;
+//     const { chatName } = req.body;
+
+//     await db.transaction(async (trx) => {});
+
+//     const [receiver] = await db
+//       .select({ id: userTable.id, name: userTable.name })
+//       .from(userTable)
+//       .where(eq(userTable.id, receiverId))
+//       .limit(1);
+
+//     if (!receiver.id) {
+//       return res.status(400).json({ message: 'Receiver ID not found in the database' });
+//     }
+
+//     const chatNickName = chatName && chatName.trim() !== '' ? chatName : receiver.name;
+
+//     const [newChat] = await db
+//       .insert(chatTable)
+//       .values({
+//         name: chatNickName,
+//         isGroupChat: false,
+//       })
+//       .returning();
+
+//     const assignMember = await db.insert(chatMembersTable).values({
+//       userId: Id as string,
+//       chatId: newChat.id,
+//       receiverId,
+//     });
+
+//     console.log(`private room created with receiver ${receiverId}  connected to room/chatId ${newChat.id} `);
+//     return res.status(200).json({
+//       message: 'private chat created successfully',
+//       userId: Id as string,
+//       chatId: newChat.id,
+//       receiverId: receiverId,
+//       connectMemberToCShatDetail: assignMember,
+//     });
+//   } catch (error: any) {
+//     if (error.code === '23505') {
+//       //unique key violate garo vane yo error code auxa 23505 teslai detect
+//       return res.status(400).json({
+//         message: 'User is already a member of this room.',
+//       });
+//     }
+
+//     console.error('Error creating private:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// };
+
+export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { Id } = req;
+    const { receiverId } = req.params;
+    const { chatName } = req.body;
+
+    if (!receiverId) {
+      return res.status(400).json({ message: 'Receiver ID is required.' });
+    }
+
+    const receiver = await db
+      .select({ id: userTable.id, name: userTable.name })
+      .from(userTable)
+      .where(eq(userTable.id, receiverId))
+      .limit(1);
+
+    if (receiver.length === 0) {
+      return res.status(404).json({ message: 'Receiver not found.' });
+    }
+
+    //  Check if a private chat already exists between these two users
+    const existingChat = await db
+      .select({ chatId: chatMembersTable.chatId })
+      .from(chatMembersTable)
+      .where(and(eq(chatMembersTable.userId, Id as string), eq(chatMembersTable.receiverId, receiverId)))
+      .limit(1);
+
+    if (existingChat.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'Private room already exists.',
+        chatId: existingChat[0].chatId,
+      });
+    }
+    const chatNickName = chatName && chatName.trim() !== '' ? chatName : receiver[0].name;
+
+    // Use a transaction to create the room and add both users
+    await db.transaction(async (trx) => {
+      // Insert the new chat
+      const [newChat] = await trx
+        .insert(chatTable)
+        .values({
+          name: chatNickName, // Default name if chatName is not provided
+          isGroupChat: false,
+        })
+        .returning(); // Return the inserted chat row
+
+      // Add the authenticated user as a member
+      await trx.insert(chatMembersTable).values({
+        chatId: newChat.id,
+        userId: Id as string,
+        isAdmin: false,
+      });
+
+      // Add the receiver as a member
+      await trx.insert(chatMembersTable).values({
+        chatId: newChat.id,
+        userId: receiverId as string,
+        isAdmin: false,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Private room created successfully.',
+        chatId: newChat.id,
+      });
+    });
+  } catch (error: any) {
+    if (error.code === '23505') {
+      //unique key violate garo vane yo error code auxa 23505 teslai detect
+      return res.status(400).json({
+        message: 'User is already a member of this room.',
+      });
+    }
+
+    console.error('Error creating private room:', error);
+    res.status(500).json({ message: 'Failed to create private room.' });
   }
 };
