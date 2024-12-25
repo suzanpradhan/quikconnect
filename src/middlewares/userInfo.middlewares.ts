@@ -1,12 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { blackListToken, userTable } from '@/schema/schema';
+import { eq } from 'drizzle-orm';
+import { db } from '@/migrate';
 
 export interface AuthenticatedRequest extends Request {
   //new interface declare gareko tesko name AuthenticatedRequest ra yesma sabai property hunxa jun standard express:Request vako ra additional function, pro[erties add garna milxa like Id:string
   Id?: string; // Add a property to store user ID from the JWT token
 }
 
-export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticateJWT = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   console.log('token in user middleware:', token);
@@ -16,6 +19,10 @@ export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: 
   }
 
   try {
+    const checkBlackListedToken = await db.select().from(blackListToken).where(eq(blackListToken.token, token)).limit(0);
+    if (checkBlackListedToken.length > 0) {
+      return res.status(401).json({ message: 'token is blacklisted' });
+    }
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error('JWT_SECRET is not defined');

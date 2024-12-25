@@ -9,6 +9,6 @@ authRouter.post('/signin', signin);
 authRouter.post('/forgotPassword', forgotPassword);
 authRouter.post('/createNewPassword', createNewPassword);
 authRouter.post('/changePassword', authenticateJWT, changePassword);
-authRouter.post('/logout', logout);
+authRouter.post('/log-out', logout);
 
 export default authRouter;

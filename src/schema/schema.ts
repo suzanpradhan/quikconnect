@@ -1,4 +1,3 @@
-import { time } from 'console';
 import { jsonb, uniqueIndex } from 'drizzle-orm/pg-core';
 import { bigint, boolean, varchar, uuid, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
@@ -72,8 +71,8 @@ export const userSocketMap = pgTable('user_socket_map', {
   lastActive: timestamp('last_active').defaultNow(),
 });
 
-export const blackListToken = pgTable('black-list-token', {
-  id: varchar('id').notNull().primaryKey(),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  expiresAt: timestamp('expiresAt').notNull(),
+export const blackListToken = pgTable('black-listed-token', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  token: varchar('token').notNull().unique().primaryKey(),
+  expiry: timestamp('expiry').notNull(),
 });

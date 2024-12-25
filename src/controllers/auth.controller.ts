@@ -194,33 +194,31 @@ export const createNewPassword = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    const token = req.headers.authorization?.split('')[1];
-
+    const token = req.headers.authorization?.split(' ')[1]; // Corrected split
     if (!token) {
-      return res.status(400).json({ message: 'token doesnot exist,authorization token is required' });
+      return res.status(400).json({ message: 'Authorization token is required.' });
     }
 
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      return res.status(400).json({ message: 'jwt_secret key is not defined ' });
+      return res.status(404).json({ message: 'JWT_SECRET is not defined.' });
     }
 
-    const decoded = Jwt.verify(token, secret) as { Id: string };
-    console.log('decoded id from logut controller', decoded);
+    const decoded = Jwt.verify(token, secret) as { exp: number };
+    if (!decoded?.exp) {
+      return res.status(400).json({ message: 'Invalid token.' });
+    }
 
-    // await db.insert(blackListToken).values({
-    //   token,
+    const expiryAt = new Date(decoded.exp * 1000); // Convert expiry time to Date
+    await db.insert(blackListToken).values({
+      token,
+      expiry: expiryAt,
+    });
 
-    // });
-    // await addTokenTo
-    //
-    //
-    //
-    //
-    res.clearCookie('auth_token'); // cookies use gareko xa  token store garna vane, clear the cookie
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.clearCookie('auth_token'); // Clear cookies if used for token storage
+    return res.status(200).json({ message: 'Logged out successfully.' });
   } catch (error) {
-    console.error(logout, error);
-    return res.status(500).json({ message: 'internal server error' });
+    console.error('Logout Error:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
   }
 };

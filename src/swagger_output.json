@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.7:8001/api",
+  "host": "192.168.1.10:8001/api",
   "basePath": "/",
   "tags": [
     {
@@ -211,7 +211,7 @@
         }
       }
     },
-    "/logout": {
+    "/log-out": {
       "post": {
         "description": "",
         "parameters": [
@@ -227,6 +227,9 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
