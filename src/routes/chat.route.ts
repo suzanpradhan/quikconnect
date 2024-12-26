@@ -8,6 +8,7 @@ import {
   sendMessage,
   deleteMessages,
   createPrivateRoom,
+  sendMultimedia,
 } from '../controllers/chat.controller';
 import { authenticateJWT } from '@/middlewares/userInfo.middlewares';
 import joinRoomLimiter from '@/utils/ratelimit.utills';
@@ -22,14 +23,7 @@ chatRouter.get('/messages/:chatId', messages); // get all messages for a specifi
 chatRouter.post('/create-room', authenticateJWT, createRoom);
 chatRouter.post('/create-private-room/:receiverId', authenticateJWT, createPrivateRoom); // :receiverId? yo garo vane receiverId optional hunxa
 chatRouter.post('/join-room/:chatId/:receiverId', joinRoom);
-// chatRouter.post('/join-room/:chatId/:receiverId', joinRoom);
 chatRouter.post('/send-message/:chatId', authenticateJWT, sendMessage);
+chatRouter.post('/send-media/:chatId', authenticateJWT, uploads.array('files', 5), validateFileUpload, sendMultimedia);
 chatRouter.delete('/delete-messages/:chatId/:messageId', authenticateJWT, deleteMessages);
-
-// chatRouter.post(
-//   '/send-message/:chatId/:receiverId?', // receiver id can be null
-//   uploads.array('files', 5),
-//   validateFileUpload,
-//   sendFileMessage,
-// );
 export default chatRouter;

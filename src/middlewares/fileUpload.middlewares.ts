@@ -27,4 +27,3 @@ export const uploadAvatar = multer({
   fileFilter,
   limits: { fileSize: CONFIG.MAX_FILE_SIZE }, // Limit file size
 });
-

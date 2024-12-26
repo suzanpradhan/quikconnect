@@ -1,11 +1,9 @@
 import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
-import { chatTable, chatMembersTable, messageTable, userSocketMap, userTable } from '@/schema/schema';
+import { chatTable, chatMembersTable, messageTable, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
 import { eq, and } from 'drizzle-orm';
 import { io } from '../index';
-import { isMemberName } from 'typescript';
-import { join } from 'path';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { message } = req.body;
@@ -62,41 +60,63 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-// export const sendFileMessage = async(req:AuthenticatedRequest,res:Response,request:Express.Multer.File[])=>{
-// const file = request[0];
-// const senderId= req.Id;
-// const {chatId} = req.params;
+export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  try {
+    const senderId = req.Id;
+    const { chatId } = req.params;
 
-//   try {
-//     const senderData = await db
-//     .select({ senderName: userTable.name })
-//     .from(userTable)
-//     .where(eq(userTable.id, senderId as string));
+    if (!senderId || !chatId) {
+      return res.status(400).json({ success: false, message: 'Sender ID and Chat ID are required.' });
+    }
 
-//   if (senderData.length === 0) {
-//     return res.status(404).json({ success: false, message: 'Sender not found.' });
-//   }
+    if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
+      return res.status(400).json({ success: false, message: 'No files uploaded.' });
+    }
 
-//   const senderName = senderData[0].senderName;
+    const files = req.files as Express.Multer.File[]; // Cast req.files to the appropriate type
+    const file = files[0]; // Assuming you want to process the first file
 
-//   const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
-//   const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
+    // Retrieve sender name
+    const senderData = await db
+      .select({ senderName: userTable.name })
+      .from(userTable)
+      .where(eq(userTable.id, senderId as string));
 
-//   // const sendFile = await db.insert(messageTable).values({
-//   //   attachmentURL: attachmentUrl ,
-//   //   mediaType,
-//   //   name:senderName ,
-//   //   ,
-//   //   senderId: senderId as string,
-//   //   chatId,
-//   // })
-//   console.log('file uploaded uploaded successfully',)
-//   return res.status(200).json({fileuploaded:sendFileMessage})
-//   } catch (error) {
-//     console.log(sendFileMessage,error)
-//     return res.status(400).json({message:'internal server error'})
-//   }
-// }
+    if (senderData.length === 0) {
+      return res.status(404).json({ success: false, message: 'Sender not found.' });
+    }
+
+    const senderName = senderData[0].senderName;
+
+    // Save file information
+    const attachmentUrl = `/uploads/${file.filename}`; // File path (adjust as needed)
+    const mediaType = file.mimetype.split('/')[0]; // Extract media type (e.g., 'image', 'video')
+
+    const sendFile = await db.insert(messageTable).values({
+      attachmentURL: attachmentUrl,
+      mediaType,
+      message: 'media',
+      name: senderName,
+      senderId: senderId as string,
+      chatId,
+    });
+
+    io.to(chatId).emit('receiveMessage', {
+      attachmentURL: attachmentUrl,
+      mediaType,
+      name: senderName,
+      message: 'media',
+      senderId,
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log('File uploaded successfully');
+    return res.status(200).json({ success: true, fileUploaded: sendFile });
+  } catch (error) {
+    console.error('Error in sendFileMessage:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
 
 export const deleteMessages = async (req: Request, res: Response) => {
   try {
@@ -248,6 +268,7 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
       userId: Id as string,
       creatorName: creatorData.name,
       memberName: creatorData.name,
+      chatName: chatName,
       joinLink,
     });
   } catch (error) {
@@ -302,66 +323,11 @@ export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-// export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response) => {
-//   try {
-//     const { Id } = req;
-//     const { receiverId } = req.params;
-//     const { chatName } = req.body;
-
-//     await db.transaction(async (trx) => {});
-
-//     const [receiver] = await db
-//       .select({ id: userTable.id, name: userTable.name })
-//       .from(userTable)
-//       .where(eq(userTable.id, receiverId))
-//       .limit(1);
-
-//     if (!receiver.id) {
-//       return res.status(400).json({ message: 'Receiver ID not found in the database' });
-//     }
-
-//     const chatNickName = chatName && chatName.trim() !== '' ? chatName : receiver.name;
-
-//     const [newChat] = await db
-//       .insert(chatTable)
-//       .values({
-//         name: chatNickName,
-//         isGroupChat: false,
-//       })
-//       .returning();
-
-//     const assignMember = await db.insert(chatMembersTable).values({
-//       userId: Id as string,
-//       chatId: newChat.id,
-//       receiverId,
-//     });
-
-//     console.log(`private room created with receiver ${receiverId}  connected to room/chatId ${newChat.id} `);
-//     return res.status(200).json({
-//       message: 'private chat created successfully',
-//       userId: Id as string,
-//       chatId: newChat.id,
-//       receiverId: receiverId,
-//       connectMemberToCShatDetail: assignMember,
-//     });
-//   } catch (error: any) {
-//     if (error.code === '23505') {
-//       //unique key violate garo vane yo error code auxa 23505 teslai detect
-//       return res.status(400).json({
-//         message: 'User is already a member of this room.',
-//       });
-//     }
-
-//     console.error('Error creating private:', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
-
 export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { Id } = req;
     const { receiverId } = req.params;
-    const { chatName } = req.body;
+    const { nickName } = req.body;
 
     if (!receiverId) {
       return res.status(400).json({ message: 'Receiver ID is required.' });
@@ -391,7 +357,7 @@ export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response
         chatId: existingChat[0].chatId,
       });
     }
-    const chatNickName = chatName && chatName.trim() !== '' ? chatName : receiver[0].name;
+    const chatNickName = nickName && nickName.trim() !== '' ? nickName : receiver[0].name;
 
     // Use a transaction to create the room and add both users
     await db.transaction(async (trx) => {
@@ -408,6 +374,7 @@ export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response
       await trx.insert(chatMembersTable).values({
         chatId: newChat.id,
         userId: Id as string,
+        receiverId: receiverId as string,
         isAdmin: false,
       });
 
@@ -415,6 +382,7 @@ export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response
       await trx.insert(chatMembersTable).values({
         chatId: newChat.id,
         userId: receiverId as string,
+        receiverId: Id as string,
         isAdmin: false,
       });
 
@@ -422,6 +390,8 @@ export const createPrivateRoom = async (req: AuthenticatedRequest, res: Response
         success: true,
         message: 'Private room created successfully.',
         chatId: newChat.id,
+        chatNickName: chatNickName,
+        receiverName: receiver[0].name,
       });
     });
   } catch (error: any) {
