@@ -1,0 +1,16 @@
+[dependencies]
+nodejs = "22.12.0"  # Node.js version as specified in package.json
+npm = true          # Ensure npm is available
+
+[build]
+commands = [
+  "npm install",                # Install dependencies
+  "npm run build"               # Run the build command from package.json
+]
+
+[start]
+command = "npm start"           # Start the application using the production start command
+
+[customizations]
+# Adding nodemon for development use (optional)
+pre_build = "npm install -g nodemon"
