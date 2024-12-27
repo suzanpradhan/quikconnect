@@ -168,3 +168,20 @@ __pycache__
 
 # === Rules for C++ development ===
 compile_commands.json
+
+#uploads
+uploads/
+# socket tester tools
+server.cert
+server.key
+*.crt
+*.key
+#socket client tester
+client.ts
+client1.html
+client2.html
+
+# webRTC
+.firebase/
+
+
