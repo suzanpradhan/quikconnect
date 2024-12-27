@@ -20,7 +20,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const senderName = senderData[0].senderName;
+    const {senderName} = senderData[0];
     //     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
     //  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
 
@@ -86,7 +86,7 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const senderName = senderData[0].senderName;
+    const {senderName} = senderData[0];
 
     // Save file information
     const attachmentUrl = `/uploads/${file.filename}`; // File path (adjust as needed)
@@ -120,8 +120,7 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
 
 export const deleteMessages = async (req: Request, res: Response) => {
   try {
-    const { messageId } = req.params;
-    const { chatId } = req.params;
+    const { messageId ,chatId} = req.params;
 
     const [deleteMessage] = await db.delete(messageTable).where(eq(messageTable.id, messageId)).returning();
 
@@ -278,9 +277,8 @@ export const createRoom = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 export const joinRoom = async (req: AuthenticatedRequest, res: Response) => {
-  const { chatId } = req.params;
+  const { chatId, receiverId } = req.params;
   // const { Id } = req; // yesle un authorized user lai room join huna bata prevent garxa
-  const { receiverId } = req.params;
 
   try {
     const [joinData] = await db //add garna la ko member ko data

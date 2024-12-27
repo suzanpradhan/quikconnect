@@ -26,7 +26,7 @@ export const socketLogic = (io: Server) => {
           return;
         }
 
-        const senderName = senderData[0].senderName;
+        const { senderName } = senderData[0];
 
         // Save the message to the database
         const newMessage = await db.insert(messageTable).values({

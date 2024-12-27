@@ -143,9 +143,6 @@
                 },
                 "newPassword": {
                   "example": "any"
-                },
-                "confirmNewPassword": {
-                  "example": "any"
                 }
               }
             }

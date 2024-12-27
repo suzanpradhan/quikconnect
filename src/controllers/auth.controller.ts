@@ -57,7 +57,7 @@ export const signin = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide both email and password' });
+      return res.status(400).json({ message: 'invalid credential' });
     }
 
     const getUsermail = await db.select().from(userTable).where(eq(userTable.email, email)).limit(1);
@@ -147,47 +147,81 @@ export const forgotPassword = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
-export const createNewPassword = async (req: Request, res: Response) => {
-  const { resetToken, newPassword, confirmNewPassword } = req.body;
+// export const createNewPassword = async (req: Request, res: Response) => {
+//   const { resetToken, newPassword, confirmNewPassword } = req.body;
+
+//   try {
+//     // Validate input
+//     if (!resetToken || !newPassword) {
+//       return res.status(400).json({ message: 'credentials are required.' });
+//     }
+
+//     // Hash the token to match the one in the database
+//     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+//     // Find the user by reset token and check expiry
+//     const user = await db
+//       .select()
+//       .from(userTable)
+//       .where(
+//         and(
+//           eq(userTable.resetToken, hashedToken), // Check if the hashed token matches
+//           gt(userTable.resetTokenExpiry, new Date()), // Check if the token is still valid,reset token bata kun date ma token generate vako dinxa ni new date lae aile ko date ani hamro token expiry time check hunxa ani yesle token validate garxa
+//         ),
+//       )
+//       .execute();
+
+//     if (!user || user.length === 0) {
+//       return res.status(400).json({ message: 'Invalid or expired reset token.' });
+//     }
+
+//     // Hash the new password
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//     // Update the user's password and clear the reset token
+//     await db
+//       .update(userTable)
+//       .set({ password: hashedPassword, resetToken: null, resetTokenExpiry: null })
+//       .where(eq(userTable.id, user[0].id))
+//       .execute();
+
+//     return res.status(200).json({ message: 'Password reset successfully.' });
+//   } catch (error) {
+//     console.error(createNewPassword, error);
+//     return res.status(500).json({ message: 'Internal server error.' });
+//   }
+// };
+
+export const createNewPassword = async (req: AuthenticatedRequest, res: Response) => {
+  const { resetToken, newPassword } = req.body;
 
   try {
-    // Validate input
     if (!resetToken || !newPassword) {
-      return res.status(400).json({ message: 'credentials are required.' });
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Hash the token to match the one in the database
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-    // Find the user by reset token and check expiry
-    const user = await db
-      .select()
-      .from(userTable)
-      .where(
-        and(
-          eq(userTable.resetToken, hashedToken), // Check if the hashed token matches
-          gt(userTable.resetTokenExpiry, new Date()), // Check if the token is still valid,reset token bata kun date ma token generate vako dinxa ni new date lae aile ko date ani hamro token expiry time check hunxa ani yesle token validate garxa
-        ),
-      )
-      .execute();
-
-    if (!user || user.length === 0) {
+    // Verify the reset token
+    let decoded;
+    let secret = process.env.JWT_SECRET as string;
+    try {
+      decoded = Jwt.verify(resetToken, secret);
+    } catch (error) {
       return res.status(400).json({ message: 'Invalid or expired reset token.' });
     }
 
-    // Hash the new password
+    const userId = req.Id; // Extracting user ID from the token payload
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update the user's password and clear the reset token
     await db
       .update(userTable)
-      .set({ password: hashedPassword, resetToken: null, resetTokenExpiry: null })
-      .where(eq(userTable.id, user[0].id))
+      .set({ password: hashedPassword })
+      .where(eq(userTable.id, userId as string))
       .execute();
 
     return res.status(200).json({ message: 'Password reset successfully.' });
   } catch (error) {
-    console.error(createNewPassword, error);
+    console.error('Error in createNewPassword:', error);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };

@@ -18,6 +18,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
     cb(null, true);
   } else {
     cb(null, false);
+
     new Error('Only image files are allowed!');
   }
 };
