@@ -19,8 +19,8 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": "18",
-    "npm": ">=10.9.0"
+    "node": "22.12.0",
+    "npm": "11.0.0"
   },
   "dependencies": {
     "@ngrok/ngrok": "^1.4.1",
