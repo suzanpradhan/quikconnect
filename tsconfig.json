@@ -1,15 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
+    "target": "ES2022", // Changed from "es6" to "ES2022" for better compatibility with modern features like `import.meta` and top-level await.
+    "module": "ESNext", // Adjusted to "ESNext" to align with ESModules and future-proof the project.
+    "moduleResolution": "Node16", // Changed from "NodeNext" to "Node16" for improved module resolution consistency in Node.js v22+.
+    "resolveJsonModule": true, // Retained as it is necessary for importing JSON files directly.
     "baseUrl": ".",
     "outDir": "build",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true, // Added for seamless interop with CommonJS modules.
+    "skipLibCheck": true, // Added to skip type-checking library files for faster builds.
     "types": ["node", "jest"],
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "plugins": [
       {
         "transform": "typescript-transform-paths"
@@ -18,11 +23,8 @@
         "transform": "typescript-transform-paths",
         "afterDeclarations": true
       }
-    ],
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    ]
   },
-  "include": ["process.env.d.ts", "./**/*.ts", "./src/**/*.ts", "src/migrate.ts"],
+  "include": ["process.env.d.ts", "./src/**/*.ts", "src/migrate.ts"],
   "exclude": ["node_modules"]
 }
