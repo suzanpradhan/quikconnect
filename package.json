@@ -7,7 +7,7 @@
     "client": "ts-node src/client.ts",
     "gs": "ts-node ./src/swagger",
     "dev": "npm run gs && cross-env NODE_ENV=development nodemon --watch src --ext ts,json,js --polling-interval 100 --exec ts-node -r tsconfig-paths/register ./src/index.ts",
-    "start": "cross-env NODE_ENV=production node ./build/src/index.js",
+    "start": "npm run build && cross-env NODE_ENV=production node ./build/src/index.js",
     "build": "tsc && tsc-alias",
     "lint": "eslint ./src/**/*.ts --fix",
     "format": "prettier --write ./**/*.{ts,json}",
