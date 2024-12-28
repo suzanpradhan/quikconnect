@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 export const CONFIG = {
-  PORT: process.env.PORT || 8001,
+  PORT: process.env.PORT || 3000,
   HOST: process.env.HOST || 'http://192.168.1.9',
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
-  BASE_URL: `${process.env.HOST || 'http://192.168.1.9'}:${process.env.PORT || 8001}`,
+  BASE_URL: `${process.env.HOST || 'http://192.168.1.9'}:${process.env.PORT || 3000}`,
   SWAGGER_PATH: process.env.SWAGGER_PATH || '/api-docs',
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/avatars/',
   UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads',
