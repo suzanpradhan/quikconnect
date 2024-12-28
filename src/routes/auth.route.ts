@@ -4,6 +4,7 @@ import { authenticateJWT } from '@/middlewares/userInfo.middlewares';
 
 const authRouter = express.Router();
 
+
 authRouter.post('/signup', signup);
 authRouter.post('/signin', signin);
 authRouter.post('/forgotPassword', forgotPassword);

@@ -24,9 +24,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 export const CONFIG = {
   PORT: process.env.PORT || 3000,
-  HOST: process.env.HOST || 'https://localhost',
+  HOST: process.env.HOST || 'http://localhost',
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
-  BASE_URL: `${process.env.HOST || 'https://localhost'}:${process.env.PORT || 3000}`,
+  BASE_URL: `${process.env.HOST || 'http://localhost'}:${process.env.PORT || 3000}`,
   SWAGGER_PATH: process.env.SWAGGER_PATH || '/api-docs',
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/avatars/',
   UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads',
