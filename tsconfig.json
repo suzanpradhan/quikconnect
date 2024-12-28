@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022", // Changed from "es6" to "ES2022" for better compatibility with modern features like `import.meta` and top-level await.
-    "module": "Node16", // Adjusted to "ESNext" to align with ESModules and future-proof the project.
+    "module": "Node16", // Adjusted to "ESNext" to align with ESModules and future-proof the project.// ani feri node16 ma gareko error aayara deploy garda
     "moduleResolution": "Node16", // Changed from "NodeNext" to "Node16" for improved module resolution consistency in Node.js v22+.
     "resolveJsonModule": true, // Retained as it is necessary for importing JSON files directly.
     "baseUrl": ".",

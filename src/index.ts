@@ -58,6 +58,7 @@ import { Server } from 'socket.io';
 import { setupSwagger } from './swagger';
 import { CONFIG } from './config/dotenvConfig';
 import { socketLogic } from './socketLogic';
+import { Response } from 'express';
 
 const app = express();
 
@@ -91,6 +92,9 @@ socketLogic(io);
 
 app.use('/api', authRoute, userInfoRoute);
 app.use('/api', chatRoute);
+app.get('/health', (req, res: Response) => {
+  res.status(200).send('OK');
+});
 
 setupSwagger(app, `${CONFIG.BASE_URL}/api`);
 
