@@ -77,6 +77,7 @@ export const io = new Server(server, {
       'http://localhost:3000',
       'http://127.0.0.1:5500',
       'http://127.0.0.1:5501/',
+      'https://t44kckcggogwko8sw8s4gkw8.62.72.31.69.sslip.io',
       CONFIG.BASE_URL,
     ],
     allowedHeaders: ['Content-Type', 'Authorization'],
