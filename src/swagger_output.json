@@ -21,7 +21,10 @@
       "description": "Account-related endpoints"
     }
   ],
-  "schemes": ["https", "http"],
+  "schemes": [
+    "https",
+    "http"
+  ],
   "paths": {
     "/signup": {
       "post": {

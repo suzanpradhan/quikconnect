@@ -30,7 +30,9 @@ app.use(express.json()); //express default middleware
 app.set('socket', io);
 socketLogic(io);
 
-app.use('/api/auth', authRoute, userInfoRoute, chatRoute);
+app.use('/api', authRoute);
+app.use('/api', userInfoRoute);
+app.use('/api', chatRoute);
 
 app.get('/health', (req, res: Response) => {
   res.status(200).send('OK');
