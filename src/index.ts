@@ -18,7 +18,7 @@ export const io = new Server(server, {
     methods: ['GET', 'POST'],
     credentials: true,
     // origin: '*',
-    origin: ['*', 'https://t44kckcggogwko8sw8s4gkw8.62.72.31.69.sslip.io', CONFIG.BASE_URL],
+    origin: ['*', 'https://t44kckcggogwko8sw8s4gkw8.62.72.31.69.sslip.io', CONFIG.BASE_URL, 'https://quickconnect.suzanpradhan.com.np'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   },
 });
