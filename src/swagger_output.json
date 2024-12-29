@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "localhost:3000/api",
+  "host": "quickconnect.suzanpradhan.com.np",
   "basePath": "/",
   "tags": [
     {
@@ -18,7 +18,7 @@
     },
     {
       "name": "account",
-      "description": "Authentication endpoints"
+      "description": "Account-related endpoints"
     }
   ],
   "schemes": [

@@ -62,7 +62,7 @@
     "@types/validator": "^13.12.2",
     "@typescript-eslint/eslint-plugin": "^6",
     "cross-env": "^7",
-    "drizzle-kit": "^0.25.0",
+    "drizzle-kit": "^0.30.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43",
