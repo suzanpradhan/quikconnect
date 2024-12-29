@@ -11,7 +11,7 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: 'https://quickconnect.suzanpradhan.com.np',
+  host: 'https://quickconnect.suzanpradhan.com.np/api',
   // host: '192.168.1.8:8001',
 
   schemes: ['https', 'http'],
@@ -37,6 +37,6 @@ export const setupSwagger = async (app: Express, url: string): Promise<void> => 
 
   // Serve Swagger UI
   const swaggerFile = require('./swagger_output.json'); // Generated file
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+  app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
   console.log('Swagger docs are available at /api-docs');
 };
