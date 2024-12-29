@@ -11,10 +11,10 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: 'http://quickconnect.suzanpradhan.com.np',
+  host: 'https://quickconnect.suzanpradhan.com.np',
   // host: '192.168.1.8:8001',
 
-  schemes: ['http', 'https'],
+  schemes: ['https', 'http'],
   tags: [
     { name: 'chat', description: 'Endpoints related to chat' },
     { name: 'auth', description: 'Authentication endpoints' },
