@@ -30,17 +30,20 @@ app.use(express.json()); //express default middleware
 app.set('socket', io);
 socketLogic(io);
 
-app.use('/api', authRoute, userInfoRoute);
-app.use('/api', chatRoute);
+app.use('/api', authRoute, userInfoRoute, chatRoute);
+
 app.get('/health', (req, res: Response) => {
   res.status(200).send('OK');
 });
+app.get('/api', (req, res: Response) => {
+  res.status(200).send(' api OK');
+});
 
-// setupSwagger(app, `${CONFIG.BASE_URL}/api`);
-setupSwagger(app, 'http://quickconnect.suzanpradhan.com.np/api');
+setupSwagger(app, `${CONFIG.BASE_URL}/api`);
+// setupSwagger(app, `https://quickconnect.suzanpradhan.com.np/api`);
 
 server.listen(CONFIG.PORT, () => {
   console.log(`server is running on ${CONFIG.BASE_URL}`);
   // console.log(`get api from ${CONFIG.BASE_URL}/api-docs`);
-  console.log(`get api from http://quickconnect.suzanpradhan.com.np/api-docs`);
+  console.log(`get api from https://quickconnect.suzanpradhan.com.np/api-docs`);
 });
