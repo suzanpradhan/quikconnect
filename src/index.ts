@@ -101,7 +101,7 @@ setupSwagger(app, `${CONFIG.BASE_URL}/api`);
 
 server.listen(CONFIG.PORT, () => {
   console.log(`server is running on ${CONFIG.BASE_URL}`);
-  console.log(`get api from ${CONFIG.BASE_URL}/api-docs`);
+  console.log(`get api from ${CONFIG.BASE_URL}/api-docs/api`);
 });
 
 // import express from 'express';
