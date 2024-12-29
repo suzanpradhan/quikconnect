@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "host": "quickconnect.suzanpradhan.com.np",
-  "basePath": "/",
+  "basePath": "/api",
   "tags": [
     {
       "name": "chat",
@@ -21,10 +21,7 @@
       "description": "Account-related endpoints"
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/signup": {
       "post": {

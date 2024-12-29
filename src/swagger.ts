@@ -1,7 +1,6 @@
 import swaggerAutogen from 'swagger-autogen';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
-import fs from 'fs';
 
 const outputFile = './swagger_output.json';
 const endpointsFiles = ['./src/routes/auth.route.ts', './src/routes/userInfo.route.ts', './src/routes/chat.route.ts'];
@@ -11,9 +10,9 @@ const doc = {
     title: 'API Documentation',
     description: 'Description of the API',
   },
-  host: 'https://quickconnect.suzanpradhan.com.np/api',
+  host: 'https://quickconnect.suzanpradhan.com.np',
   // host: '192.168.1.8:8001',
-
+  basePath: '/api',
   schemes: ['https', 'http'],
   tags: [
     { name: 'chat', description: 'Endpoints related to chat' },
@@ -37,6 +36,6 @@ export const setupSwagger = async (app: Express, url: string): Promise<void> => 
 
   // Serve Swagger UI
   const swaggerFile = require('./swagger_output.json'); // Generated file
-  app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
   console.log('Swagger docs are available at /api-docs');
 };
