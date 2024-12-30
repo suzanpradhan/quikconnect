@@ -24,8 +24,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const CONFIG = {
-  PORT: process.env.PORT || 3000,
-  // HOST: process.env.HOST || 'http://localhost',
+  PORT: process.env.PORT || 3001,
   HOST: 'https://quickconnect.suzanpradhan.com.np',
   BASE_URL: 'https://quickconnect.suzanpradhan.com.np',
   CORS_ORIGIN: 'https://quickconnect.suzanpradhan.com.np',
