@@ -20,7 +20,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const {senderName} = senderData[0];
+    const { senderName } = senderData[0];
     //     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
     //  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
 
@@ -86,7 +86,7 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const {senderName} = senderData[0];
+    const { senderName } = senderData[0];
 
     // Save file information
     const attachmentUrl = `/uploads/${file.filename}`; // File path (adjust as needed)
@@ -120,7 +120,7 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
 
 export const deleteMessages = async (req: Request, res: Response) => {
   try {
-    const { messageId ,chatId} = req.params;
+    const { messageId, chatId } = req.params;
 
     const [deleteMessage] = await db.delete(messageTable).where(eq(messageTable.id, messageId)).returning();
 

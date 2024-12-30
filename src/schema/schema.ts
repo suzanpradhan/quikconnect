@@ -72,7 +72,6 @@ export const userSocketMap = pgTable('user_socket_map', {
 });
 
 export const blackListToken = pgTable('black-listed-token', {
-  id: uuid('id').primaryKey().defaultRandom(),
   token: varchar('token').notNull().unique().primaryKey(),
   expiry: timestamp('expiry').notNull(),
 });
