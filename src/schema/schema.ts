@@ -39,11 +39,9 @@ export const chatMembersTable = pgTable(
     creatorName: varchar('creatorName'),
     joinedAt: timestamp('joinedAt').defaultNow(),
   },
-  (table) => {
-    return {
-      uniqueChatUser: uniqueIndex('unique_chat_user').on(table.chatId, table.userId), // Fixed naming for clarity
-    };
-  },
+  (table) => [
+    uniqueIndex('unique_chat_user').on(table.chatId, table.userId), // Fixed naming for clarity
+  ],
 );
 
 // Message Table
@@ -72,7 +70,6 @@ export const userSocketMap = pgTable('user_socket_map', {
 });
 
 export const blackListToken = pgTable('black-listed-token', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  token: varchar('token').notNull().unique().primaryKey(),
+  token: varchar('token').notNull().primaryKey(),
   expiry: timestamp('expiry').notNull(),
 });

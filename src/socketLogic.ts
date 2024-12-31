@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
-import { db } from './migrate'; // Replace with your actual database import
-import { messageTable, userSocketMap, userTable } from './schema/schema'; // Replace with your actual schema import
+import { db } from './migrate';
+import { messageTable,  userTable } from './schema/schema';
 import { eq } from 'drizzle-orm';
 
 export const socketLogic = (io: Server) => {

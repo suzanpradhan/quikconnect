@@ -5,8 +5,8 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "192.168.1.9:8001/api",
-  "basePath": "/",
+  "host": "localhost:3000",
+  "basePath": "/api",
   "tags": [
     {
       "name": "chat",
@@ -18,12 +18,12 @@
     },
     {
       "name": "account",
-      "description": "Authentication endpoints"
+      "description": "Account-related endpoints"
     }
   ],
   "schemes": [
-    "http",
-    "https"
+    "https",
+    "http"
   ],
   "paths": {
     "/signup": {
