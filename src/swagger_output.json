@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "quickconnect.suzanpradhan.com.np",
+  "host": "localhost:3000",
   "basePath": "/api",
   "tags": [
     {

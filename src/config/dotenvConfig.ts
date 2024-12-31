@@ -24,13 +24,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const CONFIG = {
-  PORT: process.env.PORT || 3001,
+  PORT_DEV: process.env.PORT || 3000,
+  HOST_DEV: process.env.HOST || 'http:localhost',
   HOST: 'https://quickconnect.suzanpradhan.com.np',
   BASE_URL: 'https://quickconnect.suzanpradhan.com.np',
-  CORS_ORIGIN: 'https://quickconnect.suzanpradhan.com.np',
+  BASE_URL_DEV: `${process.env.HOST || 'http://localhost'}:${process.env.PORT || 3000}`,
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   SWAGGER_PATH: process.env.SWAGGER_PATH || '/api-docs',
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/avatars/',
-  UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads',
+  UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads/',
   MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE || '5000000', 10),
   JWT_SECRET: process.env.JWT_SECRET || 'quickconnectsecretkey',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',

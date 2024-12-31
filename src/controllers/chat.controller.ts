@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { db } from '../migrate';
 import { eq, and } from 'drizzle-orm';
 import { io } from '../index';
+import { CONFIG } from '@/config/dotenvConfig';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { message } = req.body;
@@ -89,9 +90,10 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
     const { senderName } = senderData[0];
 
     // Save file information
-    const attachmentUrl = `/uploads/${file.filename}`; // File path (adjust as needed)
+    const attachmentUrl = `${CONFIG.UPLOAD_DIR_Messsage}/${file.filename}`;
+    console.log('attachmentURL from chat controller', attachmentUrl);
     const mediaType = file.mimetype.split('/')[0]; // Extract media type (e.g., 'image', 'video')
-
+    console.log('mediaType', mediaType);
     const sendFile = await db.insert(messageTable).values({
       attachmentURL: attachmentUrl,
       mediaType,
