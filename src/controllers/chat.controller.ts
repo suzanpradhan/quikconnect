@@ -137,54 +137,6 @@ export const deleteMessages = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'internal server error' });
   }
 };
-// export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-//   const { message } = req.body;
-//   const senderId = req.Id;
-//   const { chatId } = req.params;
-//   const { receiverId } = req.params;
-//   const files = req.files; // Files from Multer
-
-//   try {
-//     const messages = [];
-
-//     // Loop through each file and save it in the database
-//     for (const file of files || []) {
-//       const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
-//       const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
-
-//       const newMessage = await db.insert(messageTable).values({
-//         chatId,
-//         senderId: senderId as string,
-//         message: message || null,
-//         receiverId: receiverId || null,
-//         attachmentUrl,
-//         mediaType,
-//       });
-
-//       messages.push(newMessage);
-//     }
-
-//     // If there's only text, storing as a message without files
-//     if (!files?.length && message) {
-//       const newTextMessage = await db.insert(messageTable).values({
-//         chatId,
-//         senderId: senderId as string,
-//         message,
-//         receiverId: receiverId || null,
-//       });
-//       messages.push(newTextMessage);
-//     }
-
-//     return res.status(200).json({
-//       success: true,
-//       responseMessage: 'Messages sent successfully',
-//       messages,
-//     });
-//   } catch (error) {
-//     console.error('Error sending message:', error);
-//     return res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
 
 export const chats = async (req: Request, res: Response) => {
   const { Id } = req.params;
