@@ -5,7 +5,7 @@
     "description": "Description of the API",
     "version": "1.0.0"
   },
-  "host": "localhost:3000",
+  "host": "quickconnect.suzanpradhan.com.np",
   "basePath": "/api",
   "tags": [
     {
@@ -21,10 +21,7 @@
       "description": "Account-related endpoints"
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
+  "schemes": ["https", "http"],
   "paths": {
     "/signup": {
       "post": {
@@ -382,6 +379,16 @@
             "name": "chatId",
             "in": "path",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
             "type": "string"
           }
         ],

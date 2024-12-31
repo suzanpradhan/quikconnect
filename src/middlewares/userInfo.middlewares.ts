@@ -23,7 +23,7 @@ export const authenticateJWT = async (req: AuthenticatedRequest, res: Response, 
     if (checkBlackListedToken.length > 0) {
       return res.status(401).json({ message: 'token is blacklisted' });
     }
-    const secret = process.env.JWT_SECRET;
+    const secret = process.env.JWT_SECRET as jwt.Secret;
     if (!secret) {
       throw new Error('JWT_SECRET is not defined');
     }

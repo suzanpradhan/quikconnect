@@ -2,7 +2,7 @@ import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { chatTable, chatMembersTable, messageTable, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { io } from '../index';
 import { CONFIG } from '@/config/dotenvConfig';
 
@@ -204,9 +204,26 @@ export const chats = async (req: Request, res: Response) => {
 export const messages = async (req: Request, res: Response) => {
   const { chatId } = req.params;
 
+  const page = parseInt(req.query.page as string) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit as string) || 10; // Default to 10 messages per page if not provided
+  const offset = (page - 1) * limit;
+
   try {
-    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId));
-    return res.json(messages);
+    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId)).offset(offset).limit(limit);
+
+    const totalMessages = await db
+      .select({ count: sql`COUNT(*)` })
+      .from(messageTable)
+      .where(eq(messageTable.chatId, chatId))
+      .then((result) => result[0].count);
+
+    return res.json({
+      page,
+      limit,
+      totalMessages,
+      totalPages: Math.ceil((totalMessages as number) / limit),
+      messages,
+    });
   } catch (error) {
     console.error('error in chat controller', error);
     return res.status(500).json({ message: 'internal server error' });

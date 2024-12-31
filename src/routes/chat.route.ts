@@ -7,7 +7,7 @@ import {
   joinRoom,
   sendMessage,
   deleteMessages,
-  createPrivateRoom,
+  createPrivateRoom, 
   sendMultimedia,
 } from '../controllers/chat.controller';
 import { authenticateJWT } from '@/middlewares/userInfo.middlewares';

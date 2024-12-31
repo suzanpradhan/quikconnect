@@ -36,13 +36,13 @@ app.use('/api', chatRoute);
 
 app.get('/health', (req, res: Response) => {
   res.status(200).send('OK');
-}); 
+});
 app.get('/api', (req, res: Response) => {
   res.status(200).send(' api OK');
 });
 
 setupSwagger(app, `${CONFIG.BASE_URL}/api`);
-setupSwagger(app, `${CONFIG.BASE_URL_DEV}/api`);
+// setupSwagger(app, `${CONFIG.BASE_URL_DEV}/api`);
 
 server.listen(CONFIG.PORT_DEV, () => {
   console.log(`server is running on ${CONFIG.BASE_URL}`);
