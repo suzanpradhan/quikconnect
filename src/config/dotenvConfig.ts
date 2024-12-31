@@ -32,7 +32,7 @@ export const CONFIG = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   SWAGGER_PATH: process.env.SWAGGER_PATH || '/api-docs',
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/avatars/',
-  UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads/',
+  UPLOAD_DIR_Messsage: process.env.UPLOAD_DIR_Messsage || 'uploads/messageFileUploads',
   MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE || '5000000', 10),
   JWT_SECRET: process.env.JWT_SECRET || 'quickconnectsecretkey',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
