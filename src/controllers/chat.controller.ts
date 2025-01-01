@@ -153,11 +153,27 @@ export const chats = async (req: Request, res: Response) => {
     return res.status(500).json({ mesage: 'intgernal server error' });
   }
 };
+export interface Message {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaginatedMessagesResponse {
+  page: number;
+  limit: number;
+  totalMessages: number;
+  totalPages: number;
+  messages: Message[];
+}
 export const messages = async (req: Request, res: Response) => {
   const { chatId } = req.params;
 
-  const page = parseInt(req.query.page as string) || 1; // Default to page 1 if not provided
-  const limit = parseInt(req.query.limit as string) || 10; // Default to 10 messages per page if not provided
+  const page = Number(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = Number(req.query.limit) || 10; // Default to 10 messages per page if not provided
   const offset = (page - 1) * limit;
 
   try {
