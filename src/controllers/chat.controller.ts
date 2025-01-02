@@ -2,7 +2,7 @@ import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { chatTable, chatMembersTable, messageTable, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import { io } from '../index';
 import { CONFIG } from '@/config/dotenvConfig';
 import { logger } from '@/utils/logger.utills';
@@ -211,7 +211,13 @@ export const getMessages = async (req: Request, res: Response) => {
   const offset = (page - 1) * limit;
 
   try {
-    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId)).offset(offset).limit(limit);
+    const messages = await db
+      .select()
+      .from(messageTable)
+      .where(eq(messageTable.chatId, chatId))
+      .orderBy(desc(messageTable.createdAt))
+      .offset(offset)
+      .limit(limit);
 
     const totalMessages = await db
       .select({ count: sql`COUNT(*)` })
