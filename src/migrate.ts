@@ -1,9 +1,8 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import dotenv from 'dotenv';
 dotenv.config();
-import fs from 'fs';
 
-import { Pool } from 'pg'; // Make sure pg is installed
+import { Pool } from 'pg';
 
 // Initialize the PostgreSQL connection pool
 const pool = new Pool({
@@ -12,6 +11,10 @@ const pool = new Pool({
     rejectUnauthorized: false, // we may want to handle SSL in production differently
   },
 });
+pool
+  .connect()
+  .then(() => console.log('Connected to the database!'))
+  .catch((err) => console.error('Connection failed:', err));
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
 //   ssl: {

@@ -2,8 +2,9 @@ import { AuthenticatedRequest } from '@/middlewares/userInfo.middlewares';
 import { chatTable, chatMembersTable, messageTable, userTable } from '@/schema/schema';
 import { Request, Response } from 'express';
 import { db } from '../migrate';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { io } from '../index';
+import { CONFIG } from '@/config/dotenvConfig';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { message } = req.body;
@@ -20,7 +21,7 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const {senderName} = senderData[0];
+    const { senderName } = senderData[0];
     //     const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
     //  const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
 
@@ -86,12 +87,13 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
       return res.status(404).json({ success: false, message: 'Sender not found.' });
     }
 
-    const {senderName} = senderData[0];
+    const { senderName } = senderData[0];
 
     // Save file information
-    const attachmentUrl = `/uploads/${file.filename}`; // File path (adjust as needed)
+    const attachmentUrl = `${CONFIG.UPLOAD_DIR_Messsage}/${file.filename}`;
+    console.log('attachmentURL from chat controller', attachmentUrl);
     const mediaType = file.mimetype.split('/')[0]; // Extract media type (e.g., 'image', 'video')
-
+    console.log('mediaType', mediaType);
     const sendFile = await db.insert(messageTable).values({
       attachmentURL: attachmentUrl,
       mediaType,
@@ -120,7 +122,7 @@ export const sendMultimedia = async (req: AuthenticatedRequest, res: Response): 
 
 export const deleteMessages = async (req: Request, res: Response) => {
   try {
-    const { messageId ,chatId} = req.params;
+    const { messageId, chatId } = req.params;
 
     const [deleteMessage] = await db.delete(messageTable).where(eq(messageTable.id, messageId)).returning();
 
@@ -135,54 +137,6 @@ export const deleteMessages = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'internal server error' });
   }
 };
-// export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
-//   const { message } = req.body;
-//   const senderId = req.Id;
-//   const { chatId } = req.params;
-//   const { receiverId } = req.params;
-//   const files = req.files; // Files from Multer
-
-//   try {
-//     const messages = [];
-
-//     // Loop through each file and save it in the database
-//     for (const file of files || []) {
-//       const attachmentUrl = `/uploads/${file.filename}`; // Save file URL
-//       const mediaType = file.mimetype.split('/')[0]; // e.g., 'image', 'video'
-
-//       const newMessage = await db.insert(messageTable).values({
-//         chatId,
-//         senderId: senderId as string,
-//         message: message || null,
-//         receiverId: receiverId || null,
-//         attachmentUrl,
-//         mediaType,
-//       });
-
-//       messages.push(newMessage);
-//     }
-
-//     // If there's only text, storing as a message without files
-//     if (!files?.length && message) {
-//       const newTextMessage = await db.insert(messageTable).values({
-//         chatId,
-//         senderId: senderId as string,
-//         message,
-//         receiverId: receiverId || null,
-//       });
-//       messages.push(newTextMessage);
-//     }
-
-//     return res.status(200).json({
-//       success: true,
-//       responseMessage: 'Messages sent successfully',
-//       messages,
-//     });
-//   } catch (error) {
-//     console.error('Error sending message:', error);
-//     return res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
 
 export const chats = async (req: Request, res: Response) => {
   const { Id } = req.params;
@@ -199,12 +153,50 @@ export const chats = async (req: Request, res: Response) => {
     return res.status(500).json({ mesage: 'intgernal server error' });
   }
 };
-export const messages = async (req: Request, res: Response) => {
+export interface Message {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaginatedMessagesResponse {
+  limit: number;
+  nextCursor: string | null;
+  messages: Message[];
+}
+export const getMessages = async (req: Request, res: Response) => {
   const { chatId } = req.params;
+  const cursor = req.query.cursor as string | undefined; // Cursor for the last message fetched
+  const limit = Number(req.query.limit) || 10; // Default to 10 messages per fetch if not provided
 
   try {
-    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId));
-    return res.json(messages);
+    let query = db
+      .select()
+      .from(messageTable)
+      .where(and(eq(messageTable.chatId, chatId), cursor ? sql`${messageTable.createdAt} < ${cursor}` : sql`true`))
+      // cursor ? sql${messageTable.createdAt} < ${cursor} : sqltrue``: This is a conditional (ternary) operator that adds an additional condition based on the presence of the cursor query parameter:
+      // If cursor is defined, it adds the condition sql${messageTable.createdAt} < ${cursor}``. This condition ensures that only messages created before the timestamp specified by cursor are included in the results. This is used for pagination, fetching messages older than the last fetched message.
+      // If cursor is not defined, it adds the condition sql'true'. This is a no-op condition that always evaluates to true, effectively not filtering out any messages based on the createdAt timestamp
+      .limit(limit + 1); // Fetch one extra message to determine if there are more messages
+
+    const messages = await query;
+
+    let nextCursor = null;
+    if (messages.length > limit) {
+      const lastMessage = messages.pop(); // Remove the extra message
+      if (lastMessage && lastMessage.createdAt) {
+        nextCursor = lastMessage.createdAt.toISOString(); // Use the createdAt of the last message as the next cursor
+      }
+    }
+
+    return res.json({
+      limit,
+      nextCursor,
+      messages,
+    });
   } catch (error) {
     console.error('error in chat controller', error);
     return res.status(500).json({ message: 'internal server error' });

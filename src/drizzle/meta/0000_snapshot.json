@@ -1,9 +1,34 @@
 {
-  "id": "4ca17a5a-f323-49f9-9fcd-79e6fe1328eb",
+  "id": "064d1587-082e-4d94-a17f-af4ef02a5a6f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.black-listed-token": {
+      "name": "black-listed-token",
+      "schema": "",
+      "columns": {
+        "token": {
+          "name": "token",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expiry": {
+          "name": "expiry",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.chat_member": {
       "name": "chat_member",
       "schema": "",
@@ -27,12 +52,30 @@
           "primaryKey": false,
           "notNull": true
         },
+        "receiverId": {
+          "name": "receiverId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "isAdmin": {
           "name": "isAdmin",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "memberName": {
+          "name": "memberName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creatorName": {
+          "name": "creatorName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "joinedAt": {
           "name": "joinedAt",
@@ -91,10 +134,26 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "chat_member_receiverId_user_id_fk": {
+          "name": "chat_member_receiverId_user_id_fk",
+          "tableFrom": "chat_member",
+          "tableTo": "user",
+          "columnsFrom": [
+            "receiverId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.chat_table": {
       "name": "chat_table",
@@ -131,7 +190,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.messages": {
       "name": "messages",
@@ -244,7 +306,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.user_socket_map": {
       "name": "user_socket_map",
@@ -274,7 +339,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.user": {
       "name": "user",
@@ -353,12 +421,18 @@
             "email"
           ]
         }
-      }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {},
   "schemas": {},
   "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
