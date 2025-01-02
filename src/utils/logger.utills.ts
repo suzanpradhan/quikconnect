@@ -1,18 +1,12 @@
-import pino from 'pino';
+import winston from 'winston';
 
-const logger = pino({
-  level: process.env.LOG_LEVEL || 'info', 
-  transport:
-    process.env.NODE_ENV !== 'production'//production ma =='production' garni
-      ? {
-          target: 'pino-pretty',
-          options: {
-            colorize: true, 
-          },
-        }
-      : undefined, 
+export const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
-
-export default logger;
-
-
