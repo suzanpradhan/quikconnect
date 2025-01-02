@@ -6,6 +6,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { io } from '../index';
 import { CONFIG } from '@/config/dotenvConfig';
 import { logger } from '@/utils/logger.utills';
+import { PaginatedMessagesResponse, Message } from '@/Interface/chat.interface';
 
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
   const { message } = req.body;
@@ -202,22 +203,6 @@ export const chats = async (req: Request, res: Response) => {
 //     return res.status(500).json({ message: 'internal server error' });
 //   }
 // };
-export interface Message {
-  id: string;
-  chatId: string;
-  senderId: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface PaginatedMessagesResponse {
-  page: number;
-  limit: number;
-  totalMessages: number;
-  totalPages: number;
-  messages: string;
-}
 export const getMessages = async (req: Request, res: Response) => {
   const { chatId } = req.params;
 
@@ -226,7 +211,7 @@ export const getMessages = async (req: Request, res: Response) => {
   const offset = (page - 1) * limit;
 
   try {
-    const [messages] = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId)).offset(offset).limit(limit);
+    const messages = await db.select().from(messageTable).where(eq(messageTable.chatId, chatId)).offset(offset).limit(limit);
 
     const totalMessages = await db
       .select({ count: sql`COUNT(*)` })
@@ -239,7 +224,7 @@ export const getMessages = async (req: Request, res: Response) => {
       limit,
       totalMessages: totalMessages as number,
       totalPages: Math.ceil((totalMessages as number) / limit),
-      messages: messages as unknown as string,
+      messages: messages as Message[],
     };
 
     return res.json(response);
