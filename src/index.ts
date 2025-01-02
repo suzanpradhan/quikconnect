@@ -46,6 +46,6 @@ setupSwagger(app, `${CONFIG.BASE_URL}/api`);
 
 server.listen(CONFIG.PORT_DEV, () => {
   console.log(`server is running on ${CONFIG.BASE_URL}`);
-  // console.log(`get api from ${CONFIG.BASE_URL_DEV}/api-docs`);
+  console.log(`get api from ${CONFIG.BASE_URL_DEV}/api-docs`);
   console.log(`get api from https://quickconnect.suzanpradhan.com.np/api-docs`);
 });

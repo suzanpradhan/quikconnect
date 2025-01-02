@@ -385,7 +385,7 @@
             "type": "string"
           },
           {
-            "name": "page",
+            "name": "cursor",
             "in": "query",
             "type": "string"
           },

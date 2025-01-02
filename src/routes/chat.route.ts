@@ -1,13 +1,13 @@
 import express from 'express';
 import {
-  messages,
+  getMessages,
   chats,
   roomDetailsOrChatMembers,
   createRoom,
   joinRoom,
   sendMessage,
   deleteMessages,
-  createPrivateRoom, 
+  createPrivateRoom,
   sendMultimedia,
 } from '../controllers/chat.controller';
 import { authenticateJWT } from '@/middlewares/userInfo.middlewares';
@@ -19,7 +19,7 @@ const chatRouter = express.Router();
 
 chatRouter.get('/user/:Id', chats); // get all chats for a specific user ,/;userId
 chatRouter.get('/:chatId', roomDetailsOrChatMembers); // get all chatmembers
-chatRouter.get('/messages/:chatId', messages); // get all messages for a specific chat ,/:chatId lae
+chatRouter.get('/messages/:chatId', getMessages); // get all messages for a specific chat ,/:chatId lae
 chatRouter.post('/create-room', authenticateJWT, createRoom);
 chatRouter.post('/create-private-room/:receiverId', authenticateJWT, createPrivateRoom); // :receiverId? yo garo vane receiverId optional hunxa
 chatRouter.post('/join-room/:chatId/:receiverId', joinRoom);

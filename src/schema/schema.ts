@@ -57,7 +57,7 @@ export const messageTable = pgTable('messages', {
   name: varchar('name').notNull(),
   message: text('message').notNull(),
   messageType: varchar('messageType').default('text'),
-  timestamp: timestamp('createdAt').defaultNow(),
+  createdAt: timestamp('createdAt').defaultNow(),
   attachmentURL: varchar('attachmentURL'),
   mediaType: varchar('mediaType'),
 });

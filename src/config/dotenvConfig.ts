@@ -25,10 +25,10 @@ dotenv.config();
 
 export const CONFIG = {
   PORT_DEV: process.env.PORT || 3000,
-  // HOST_DEV: process.env.HOST || 'http:localhost',
+  HOST_DEV: process.env.HOST || 'http:localhost',
   HOST: 'https://quickconnect.suzanpradhan.com.np',
   BASE_URL: 'https://quickconnect.suzanpradhan.com.np',
-  // BASE_URL_DEV: `${process.env.HOST || 'http://localhost'}:${process.env.PORT || 3000}`,
+  BASE_URL_DEV: `${process.env.HOST || 'http://localhost'}:${process.env.PORT || 3000}`,
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   SWAGGER_PATH: process.env.SWAGGER_PATH || '/api-docs',
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads/avatars/',
